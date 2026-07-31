@@ -1,21 +1,29 @@
-/* Hallmark · tokens: Single Room · genre: atmospheric · theme: Midnight */
+/* Lumen · Single Room · register: Roobinium — saturated orange into true black */
 :root {
-  --color-paper: oklch(14% 0.010 65);
-  --color-paper-2: oklch(18% 0.012 65);
-  --color-paper-3: oklch(22% 0.012 65);
-  --color-stage: oklch(10% 0.009 65);
-  --color-rule: oklch(31% 0.012 65);
-  --color-rule-strong: oklch(42% 0.014 65);
-  --color-neutral: oklch(66% 0.010 65);
-  --color-muted: oklch(75% 0.009 65);
-  --color-ink: oklch(94% 0.010 78);
-  --color-ink-soft: oklch(86% 0.012 78);
-  --color-accent: oklch(68% 0.120 67);
-  --color-accent-ink: oklch(15% 0.020 65);
-  --color-focus: oklch(79% 0.125 72);
-  --color-error: oklch(67% 0.145 28);
-  --color-success: oklch(72% 0.085 145);
-  --color-scrim: oklch(8% 0.008 65 / 0.82);
+  /* Roobinium's grounds are warm-black with real red in them, not neutral grey.
+     Chroma is deliberately non-zero on every surface so the dark reads as heat
+     rather than as slate. */
+  --color-paper: oklch(9% 0.016 38);
+  --color-paper-2: oklch(14% 0.024 38);
+  --color-paper-3: oklch(22% 0.038 38);
+  --color-stage: oklch(7% 0.012 38);
+  --color-rule: oklch(30% 0.035 40);
+  --color-rule-strong: oklch(44% 0.055 42);
+  --color-neutral: oklch(66% 0.022 50);
+  --color-muted: oklch(77% 0.020 55);
+  --color-ink: oklch(96% 0.014 70);
+  --color-ink-soft: oklch(88% 0.020 62);
+
+  /* The reference orange is fully saturated — this is the correction. The old
+     value sat at 0.120 chroma and read brown against the imagery. */
+  --color-accent: oklch(70% 0.205 46);
+  --color-accent-hot: oklch(76% 0.200 55);
+  --color-accent-deep: oklch(52% 0.170 38);
+  --color-accent-ink: oklch(14% 0.030 40);
+  --color-focus: oklch(80% 0.180 58);
+  --color-error: oklch(66% 0.190 22);
+  --color-success: oklch(74% 0.130 150);
+  --color-scrim: oklch(5% 0.014 38 / 0.86);
 
   --font-display: "Geist", "Switzer", ui-sans-serif, sans-serif;
   --font-body: "Geist", "Switzer", ui-sans-serif, sans-serif;
@@ -41,26 +49,28 @@
   --space-3xl: 6rem;
 
   --rule-thin: 1px;
-  /* Artlist/Higgsfield register: generous radii, pills on actions. Near-square
-     corners were what made this read as a utility panel rather than a media tool. */
   --radius-control: 0.75rem;
   --radius-stage: 1rem;
   --radius-pill: 999px;
 
-  /* Warmth lives in the periphery only. It must never sit between the eye and a
-     take — a coloured immediate surround shifts how the media reads. */
-  /* AgentFlow register: a real light source low in the frame, not a flat tint.
-     Two lobes so the falloff reads as light rather than as a gradient swatch. */
+  /* Roobinium puts the saturated field at the TOP and lets it fall to true black
+     by mid-screen — its own content areas are black, which is why the whole
+     palette can be adopted without ever tinting a take. */
+  /* The reference's working screens hold the saturated field in the top band and
+     reach true black well before the content area. A slow falloff bathes the whole
+     page in brown and puts a colour cast next to every take. */
   --bloom-warm:
-    radial-gradient(64% 44% at 50% 100%, oklch(74% 0.170 55 / 0.60) 0%, transparent 72%),
-    radial-gradient(96% 62% at 50% 108%, oklch(60% 0.140 48 / 0.48) 0%, transparent 70%),
-    radial-gradient(150% 92% at 50% 120%, oklch(42% 0.085 45 / 0.55) 0%, transparent 68%);
-  /* Architectural grid, sized so it reads as structure and never as a texture swatch. */
-  --grid-line: oklch(100% 0 0 / 0.030);
+    radial-gradient(96% 30% at 50% -6%, oklch(74% 0.210 48 / 1) 0%, oklch(60% 0.195 42 / 0.62) 40%, transparent 76%),
+    radial-gradient(62% 20% at 76% -4%, oklch(78% 0.200 56 / 0.70) 0%, transparent 70%),
+    linear-gradient(to bottom, oklch(30% 0.090 38 / 0.55) 0%, transparent 34%),
+    radial-gradient(120% 22% at 50% 106%, oklch(38% 0.130 32 / 0.45) 0%, transparent 78%);
+  --grid-line: oklch(100% 0 0 / 0.038);
   --grid-size: 7.5rem;
-  /* Grain keeps large flat fields from banding on an OLED panel. */
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  --shadow-float: 0 1px 2px oklch(0% 0 0 / 0.4), 0 12px 32px oklch(0% 0 0 / 0.45);
+  --shadow-float: 0 1px 2px oklch(0% 0 0 / 0.5), 0 16px 40px oklch(0% 0 0 / 0.55);
+  /* The reference's action button is a lit sphere, not a flat disc. */
+  --gradient-action: radial-gradient(120% 120% at 30% 22%, oklch(82% 0.185 62) 0%, oklch(69% 0.210 45) 46%, oklch(56% 0.185 36) 100%);
+  --glow-action: 0 0 0 1px oklch(78% 0.190 52 / 0.45), 0 6px 20px oklch(62% 0.200 45 / 0.42);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);

@@ -22,11 +22,18 @@ workspaces. Every generation records model, prompt, cost and provenance in
 
 ## Design register — locked
 
-**AgentFlow**, chosen 2026-07-31. Warm three-lobe bloom low in the frame,
-architectural grid with hatched cells, warm frosted glass composer, solid warm
-disc action, segmented workspace switcher, pill status chips.
+**Roobinium**, chosen 2026-07-31, applied whole — including the colours.
+Saturated orange band across the top falling to true black before the content
+area, warm-black grounds carrying real red chroma (never neutral grey), warm
+glass panels, a lit-sphere action button, orange-tinted active states.
 
-Deliberately not adopted: AgentFlow's white lower half.
+Chosen over AgentFlow because it is the only complete dark palette of the three:
+AgentFlow's colour story depends on a dark-to-white gradient whose white half is
+wrong for judging footage, so adopting it meant adopting half a palette.
+Roobinium needs no exclusions — its own working screens already put content on
+black and hold the orange in the top band and on controls.
+
+The earlier accent sat at 0.120 chroma and read brown. It is now 0.205.
 
 **The one rule that is not a preference:** the stage stays neutral. Grain, grid
 and bloom all sit at `z-index: -1/-2` behind an opaque stage. A coloured or

@@ -216,8 +216,6 @@ export function Room({
 
   return (
     <main className="room" data-room-state={roomState}>
-      <div className="room__hatch" aria-hidden="true"><i /><i /><i /><i /></div>
-
       <header className="room__bar">
         <button className="wordmark" onClick={() => setSelectedId(null)}>Lumen</button>
 
