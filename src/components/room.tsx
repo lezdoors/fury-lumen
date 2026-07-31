@@ -1,6 +1,14 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FormEvent,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { brands } from "@/lib/catalog";
 import { estimateCost } from "@/lib/types";
 import type {
@@ -27,6 +35,22 @@ function clock(seconds: number) {
 
 function isVideo(job: GenerationJob) {
   return job.mediaKind === "video" || Boolean(job.mimeType?.startsWith("video/"));
+}
+
+/**
+ * Chrome paints a poster from `#t=`; Safari does not — it holds black until the
+ * element is seeked. Nudging currentTime once metadata lands makes the take
+ * thumbnails render everywhere.
+ */
+function paintFirstFrame(event: SyntheticEvent<HTMLVideoElement>) {
+  const video = event.currentTarget;
+  if (video.currentTime < 0.05 && Number.isFinite(video.duration)) {
+    try {
+      video.currentTime = Math.min(0.1, video.duration / 2);
+    } catch {
+      // A provider URL that rejects range requests simply keeps its black frame.
+    }
+  }
 }
 
 function modelKeyOf(model: Pick<ProviderModel, "providerId" | "id">) {
@@ -364,7 +388,13 @@ export function Room({
               <span className="take__image">
                 <span className="take__letter">{LETTERS[index] ?? "·"}</span>
                 {job.assetUrl && isVideo(job) && (
-                  <video src={`${job.assetUrl}#t=0.1`} muted playsInline preload="metadata" />
+                  <video
+                    src={`${job.assetUrl}#t=0.1`}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    onLoadedMetadata={paintFirstFrame}
+                  />
                 )}
                 {job.assetUrl && !isVideo(job) && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -569,10 +599,11 @@ export function Room({
                 <div className="history-frame">
                   {job.assetUrl && isVideo(job) && (
                     <video
-                      src={job.assetUrl}
+                      src={`${job.assetUrl}#t=0.1`}
                       muted
                       playsInline
                       preload="metadata"
+                      onLoadedMetadata={paintFirstFrame}
                       style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   )}
