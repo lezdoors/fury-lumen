@@ -258,3 +258,47 @@ button:focus-visible, select:focus-visible, a:focus-visible, textarea:focus-visi
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
 }
+
+/* ------------------------------------------------------------ language ---- */
+
+.langs {
+  display: inline-flex; gap: 2px; padding: 3px;
+  border-radius: var(--radius-pill);
+  border: var(--rule-thin) solid oklch(100% 0 0 / 0.12);
+  background: oklch(100% 0 0 / 0.05);
+}
+.lang {
+  min-width: 2.25rem; min-height: 1.75rem; padding-inline: var(--space-xs);
+  border: 0; border-radius: var(--radius-pill); background: transparent;
+  color: oklch(90% 0.010 70 / 0.6); font: var(--text-xs) var(--font-mono);
+  letter-spacing: .04em; cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.lang[aria-pressed="true"] { background: oklch(100% 0 0 / 0.14); color: oklch(98% 0.008 70); }
+
+/* Arabic ships no Geist glyphs; the platform Arabic face is the right fallback
+   and costs nothing to load. */
+:root:lang(ar), :root[dir="rtl"] body {
+  font-family: "Geist", "SF Arabic", "Geeza Pro", "Segoe UI", system-ui, sans-serif;
+}
+/* The action arrow is directional: it must point the way reading travels. */
+[dir="rtl"] .go span { display: block; transform: scaleX(-1); }
+/* Latin-scripted metadata stays LTR inside an RTL page so ids and prices read
+   correctly rather than reordering around their punctuation. */
+[dir="rtl"] .spend,
+[dir="rtl"] .ask__cost,
+[dir="rtl"] .card__foot small,
+[dir="rtl"] .lightbox__bar span,
+[dir="rtl"] .model-row b,
+[dir="rtl"] .results__head span { direction: ltr; unicode-bidi: isolate; }
+[dir="rtl"] .card__foot small,
+[dir="rtl"] .results__head span { text-align: start; }
+
+/* Prompts are user text and may be in any script, so each one takes its own
+   direction from its first strong character rather than inheriting the page's.
+   Without this an English prompt clips from the wrong edge in an RTL layout. */
+.card__foot strong,
+.lightbox__bar strong,
+.live b,
+.ask textarea { unicode-bidi: plaintext; }
+.card__foot strong { text-align: start; }

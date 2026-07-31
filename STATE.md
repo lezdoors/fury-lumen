@@ -46,6 +46,25 @@ It is NOT brand-scoped. Early builds inherited Maison Tanneurs / Maison Izem
 workspaces and A/B/C/D take letters from the first scaffold. Both were removed
 on 2026-07-31 — Higgsfield has neither, and neither belongs here.
 
+## Languages
+
+EN, FR, ES, AR with a switcher in the top bar. Preference persists in
+localStorage and falls back to the browser's languages.
+
+Arabic mirrors the whole interface via `dir="rtl"` on the document — no
+duplicate layout, because every rule was already written with logical
+properties. Two rules earn their keep there: Latin metadata (ids, prices) is
+isolated `direction: ltr` so it does not reorder around its punctuation, and
+prompts use `unicode-bidi: plaintext` so each one takes direction from its own
+first strong character rather than the page's.
+
+The locale is read through `useSyncExternalStore` rather than an effect, so the
+server can render English and the client can differ without a hydration
+mismatch.
+
+Still English: provider error strings and model availability reasons, which come
+from the server.
+
 ## Not done
 
 - **Nothing has ever called fal. No key, $0 spent.**

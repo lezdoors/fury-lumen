@@ -7,15 +7,52 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
+import {
+  DICTIONARIES,
+  LOCALES,
+  LOCALE_LABELS,
+  LOCALE_NAMES,
+  dirOf,
+  formatMoney,
+  isLocale,
+  resolveLocale,
+} from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n";
 import { estimateCost } from "@/lib/types";
 import type { AspectRatio, GenerationJob, ProviderModel, ReviewStatus } from "@/lib/types";
 
 const RATIOS: AspectRatio[] = ["16:9", "9:16", "1:1", "4:5", "3:4"];
 const POLL_INTERVAL_MS = 2500;
 
-function money(value: number) {
-  return `$${value.toFixed(2)}`;
+const LOCALE_STORAGE_KEY = "lumen.locale";
+const LOCALE_EVENT = "lumen:locale";
+
+/**
+ * The locale is external state: it lives in localStorage and must differ between
+ * the server render (always English, so markup matches) and the client. Reading
+ * it through a store is what keeps hydration clean without setting state from an
+ * effect.
+ */
+function subscribeLocale(onChange: () => void) {
+  window.addEventListener(LOCALE_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(LOCALE_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+function readLocale(): Locale {
+  const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+  if (isLocale(stored)) return stored;
+  return resolveLocale(navigator.languages ?? [navigator.language]);
+}
+
+function writeLocale(next: Locale) {
+  window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
+  window.dispatchEvent(new Event(LOCALE_EVENT));
 }
 
 function clock(seconds: number) {
@@ -52,6 +89,9 @@ export function Room({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [now, setNow] = useState(() => Date.now());
+  const locale = useSyncExternalStore(subscribeLocale, readLocale, () => "en" as Locale);
+  const t = DICTIONARIES[locale];
+  const money = useCallback((value: number) => formatMoney(value, locale), [locale]);
   const formRef = useRef<HTMLFormElement>(null);
 
   const selectedModel = models.find((model) => modelKeyOf(model) === modelKey);
@@ -109,6 +149,13 @@ export function Room({
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, [running.length]);
+
+  // Arabic mirrors the interface. Every rule uses logical properties, so setting
+  // dir on the document is the entire flip.
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.documentElement.dir = dirOf(locale);
+  }, [locale]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -173,33 +220,49 @@ export function Room({
 
       <header className="topbar">
         <span className="wordmark">Lumen</span>
-        <nav className="topnav" aria-label="Sections">
-          <a href="#results">Results</a>
-          <button type="button" onClick={() => setSettingsOpen(true)}>Models</button>
+        <nav className="topnav" aria-label={t.navResults}>
+          <a href="#results">{t.navResults}</a>
+          <button type="button" onClick={() => setSettingsOpen(true)}>{t.navModels}</button>
         </nav>
         <div className="topbar__right">
-          <span className="spend">Spent {money(spend)}</span>
+          <div className="langs" role="group" aria-label={t.language}>
+            {LOCALES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                className="lang"
+                lang={code}
+                title={LOCALE_NAMES[code]}
+                aria-label={LOCALE_NAMES[code]}
+                aria-pressed={locale === code}
+                onClick={() => writeLocale(code)}
+              >
+                {LOCALE_LABELS[code]}
+              </button>
+            ))}
+          </div>
+          <span className="spend">{t.spent} {money(spend)}</span>
           <span className={`chip ${running.length ? "chip--live" : ""}`}>
-            {running.length ? `${running.length} generating` : "Idle"}
+            {running.length ? t.generatingCount(running.length) : t.idle}
           </span>
         </div>
       </header>
 
       <section className="hero">
-        <span className="badge">Pay per generation — no subscription</span>
+        <span className="badge">{t.badge}</span>
 
         <h1>
-          Make anything.<br />
-          Pay only for <em>what you make</em>
+          {t.headlineTop}<br />
+          {t.headlineLead} <em>{t.headlineAccent}</em>
         </h1>
 
         <form className="ask" onSubmit={generate} ref={formRef}>
-          <label className="sr-only" htmlFor="prompt">Describe what to generate</label>
+          <label className="sr-only" htmlFor="prompt">{t.promptLabel}</label>
           <textarea
             id="prompt"
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
-            placeholder="Describe what you want to create…"
+            placeholder={t.promptPlaceholder}
             rows={2}
           />
           <div className="ask__row">
@@ -207,24 +270,24 @@ export function Room({
               <button
                 type="button"
                 className="circle"
-                title="Reference image — not wired yet"
-                aria-label="Add a reference image"
+                title={t.referenceTitle}
+                aria-label={t.referenceAria}
                 disabled
               >
                 +
               </button>
               <button type="button" className="model-chip" onClick={() => setSettingsOpen(true)}>
-                {selectedModel ? selectedModel.label : "No model"}
+                {selectedModel ? selectedModel.label : t.noModel}
                 {selectedModel?.mediaKind === "video" ? ` · ${effectiveDuration}s` : ""} · {ratio}
                 <span aria-hidden="true">⌄</span>
               </button>
             </div>
             <div className="ask__right">
               {error && <span className="ask__error">{error}</span>}
-              <span className="ask__cost">{isSubmitting ? "Sending…" : money(cost)}</span>
+              <span className="ask__cost">{isSubmitting ? t.sending : money(cost)}</span>
               <button
                 className="go"
-                aria-label={`Generate for ${money(cost)}`}
+                aria-label={t.generateAria(money(cost))}
                 disabled={!selectedModel?.available || !prompt.trim() || isSubmitting}
               >
                 <span aria-hidden="true">→</span>
@@ -234,12 +297,12 @@ export function Room({
         </form>
 
         {running.length > 0 && (
-          <ul className="live" aria-label="In progress">
+          <ul className="live" aria-label={t.inProgress}>
             {running.map((job) => (
               <li key={job.id}>
                 <i aria-hidden="true" />
                 <b>{job.prompt.slice(0, 46)}</b>
-                <span>{job.queuePosition ? `queued ${job.queuePosition}` : "generating"}</span>
+                <span>{job.queuePosition ? t.queuedAt(job.queuePosition) : t.generating}</span>
                 <time>{elapsedOf(job)}</time>
               </li>
             ))}
@@ -249,13 +312,13 @@ export function Room({
 
       <section className="results" id="results">
         <div className="results__head">
-          <h2>Your generations</h2>
-          <span>{jobs.length} total · {money(spend)} spent</span>
+          <h2>{t.resultsTitle}</h2>
+          <span>{t.resultsMeta(jobs.length, money(spend))}</span>
         </div>
 
         {jobs.length === 0 ? (
           <p className="results__empty">
-            Nothing yet. Describe something above and press <kbd>⌘</kbd><kbd>↵</kbd>.
+            {t.resultsEmpty} <kbd>⌘</kbd><kbd>↵</kbd>.
           </p>
         ) : (
           <div className="grid">
@@ -277,10 +340,10 @@ export function Room({
                   )}
                   {!job.assetUrl && (
                     <span className="card__status">
-                      {job.status === "failed" ? "Failed" : "Generating…"}
+                      {job.status === "failed" ? t.cardFailed : t.cardGenerating}
                     </span>
                   )}
-                  {isVideo(job) && job.assetUrl && <span className="card__kind">VIDEO</span>}
+                  {isVideo(job) && job.assetUrl && <span className="card__kind">{t.videoTag}</span>}
                 </span>
                 <span className="card__foot">
                   <strong>{job.prompt}</strong>
@@ -315,16 +378,16 @@ export function Room({
                   {money(opened.actualCostUsd ?? opened.estimatedCostUsd)}
                 </span>
               </div>
-              <a className="btn" href={opened.assetUrl} download>Download</a>
+              <a className="btn" href={opened.assetUrl} download>{t.download}</a>
               <button
                 className="btn"
                 onClick={() =>
                   review(opened.id, opened.reviewStatus === "approved" ? "unreviewed" : "approved")
                 }
               >
-                {opened.reviewStatus === "approved" ? "★ Kept" : "☆ Keep"}
+                {opened.reviewStatus === "approved" ? t.kept : t.keep}
               </button>
-              <button className="btn" onClick={() => setOpenId(null)} aria-label="Close">✕</button>
+              <button className="btn" onClick={() => setOpenId(null)} aria-label={t.close}>✕</button>
             </div>
           </div>
         </div>
@@ -341,10 +404,10 @@ export function Room({
           >
             <header>
               <div>
-                <span>MODEL</span>
-                <h2 id="model-title">What should make it</h2>
+                <span>{t.modelEyebrow}</span>
+                <h2 id="model-title">{t.modelTitle}</h2>
               </div>
-              <button onClick={() => setSettingsOpen(false)} aria-label="Close">✕</button>
+              <button onClick={() => setSettingsOpen(false)} aria-label={t.close}>✕</button>
             </header>
 
             <div className="model-list">
@@ -376,7 +439,7 @@ export function Room({
 
             <div className="field-grid">
               <label>
-                Aspect ratio
+                {t.aspectRatio}
                 <select value={ratio} onChange={(event) => setRatio(event.target.value as AspectRatio)}>
                   {RATIOS.map((value) => (
                     <option key={value} value={value}>{value}</option>
@@ -385,23 +448,20 @@ export function Room({
               </label>
               {selectedModel?.mediaKind === "video" && (
                 <label>
-                  Duration
+                  {t.duration}
                   <select
                     value={effectiveDuration}
                     onChange={(event) => setDuration(Number(event.target.value))}
                   >
                     {(allowedDurations ?? [5]).map((value) => (
-                      <option key={value} value={value}>{value} seconds</option>
+                      <option key={value} value={value}>{t.seconds(value)}</option>
                     ))}
                   </select>
                 </label>
               )}
             </div>
 
-            <p className="sheet__note">
-              Estimated cost is <strong>{money(cost)}</strong> per generation. Final billing is
-              the provider&rsquo;s.
-            </p>
+            <p className="sheet__note">{t.costNote(money(cost))}</p>
           </section>
         </div>
       )}
