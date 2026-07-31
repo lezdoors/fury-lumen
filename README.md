@@ -1,4 +1,4 @@
-# Atelier
+# Lumen
 
 A small, provider-neutral creative production console. It keeps Maison Tanneurs and Maison Izem in separate workspaces, records generation provenance and cost, and provides a review/export loop without an aggregator UI.
 
@@ -42,7 +42,7 @@ pnpm build     # production build
 
 ## Design boundary
 
-Atelier is not a Higgsfield clone. New providers belong in `src/lib/providers/`, behind the shared `GenerationProvider` contract. Add models only when they serve a repeated workflow. Product-source images must remain traceable to their approved source; generated editorial outputs must never silently replace commerce heroes.
+Lumen is not a Higgsfield clone. New providers belong in `src/lib/providers/`, behind the shared `GenerationProvider` contract. Add models only when they serve a repeated workflow. Product-source images must remain traceable to their approved source; generated editorial outputs must never silently replace commerce heroes.
 
 ## Next integrations
 

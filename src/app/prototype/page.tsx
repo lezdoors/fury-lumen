@@ -51,7 +51,7 @@ export default function SingleRoomPrototype() {
   return (
     <main className="room" data-room-state={roomState}>
       <header className="room__bar">
-        <button className="wordmark" onClick={() => setRoomState("compose")}>Atelier</button>
+        <button className="wordmark" onClick={() => setRoomState("compose")}>Lumen</button>
         <div className="project-name">
           <span>Maison Tanneurs</span>
           <strong>Campaign studies</strong>

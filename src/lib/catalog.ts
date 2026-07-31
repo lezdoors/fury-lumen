@@ -52,18 +52,18 @@ export function getModels(): ProviderModel[] {
 
   return [
     {
-      id: "atelier-proof",
+      id: "lumen-proof",
       providerId: "mock",
-      providerLabel: "Atelier",
+      providerLabel: "Lumen",
       label: "Proof mode · image",
       mediaKind: "image",
       available: true,
       estimatedCostUsd: 0,
     },
     {
-      id: "atelier-proof-video",
+      id: "lumen-proof-video",
       providerId: "mock",
-      providerLabel: "Atelier",
+      providerLabel: "Lumen",
       label: "Proof mode · video",
       mediaKind: "video",
       available: true,

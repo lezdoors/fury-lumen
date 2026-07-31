@@ -139,7 +139,7 @@ export function Studio({
     <div className="studio-shell">
       <aside className="sidebar">
         <div>
-          <div className="wordmark">ATELIER</div>
+          <div className="wordmark">LUMEN</div>
           <p className="sidebar-caption">Direct creative production</p>
         </div>
 

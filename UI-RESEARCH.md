@@ -1,11 +1,11 @@
-# Atelier UI research
+# Lumen UI research
 
 Status: research brief for the implementation pass
 Updated: 2026-07-30
 
 ## Decision
 
-Atelier should be a **single-room creative workbench**, not a dashboard and not an infinite node canvas.
+Lumen should be a **single-room creative workbench**, not a dashboard and not an infinite node canvas.
 
 The common loop is narrow:
 
@@ -37,7 +37,7 @@ The existing `/prototype` is the correct structural starting point. The existing
 
 - The canvas is too empty in Compose and too theatrical in Running. “Exposing motion” is presentation copy, not operational information.
 - The prototype uses too much vertical space. On a laptop, the composer and take strip will compete with the media stage.
-- The large serif treatment makes the Running state look like a campaign page. Serif should be limited to the Atelier wordmark or an occasional project title; operational UI should use Geist.
+- The large serif treatment makes the Running state look like a campaign page. Serif should be limited to the Lumen wordmark or an occasional project title; operational UI should use Geist.
 - The state switcher is prototype chrome and must disappear.
 - Settings are shown as a modal sheet, but frequent model controls should live in a collapsible/resizable inspector.
 - The take strip lacks real thumbnails, hover preview, status details, retry reason, selection mechanics, and multiselect.
@@ -50,7 +50,7 @@ The existing `/prototype` is the correct structural starting point. The existing
 
 ### Krea: strongest reference for product simplification
 
-Krea’s March 2026 redesign is the clearest benchmark for Atelier’s overall interaction philosophy:
+Krea’s March 2026 redesign is the clearest benchmark for Lumen’s overall interaction philosophy:
 
 - one global sidebar
 - sessions that persist across tools
@@ -69,7 +69,7 @@ Krea 2 also separates “what” from “how” through reference roles and stre
 
 Source: https://www.krea.ai/blog/krea-2-deep-dive-walkthrough
 
-For Atelier, this suggests visible reference roles:
+For Lumen, this suggests visible reference roles:
 
 - Product / subject lock
 - First frame
@@ -93,7 +93,7 @@ It collects all outputs from a session in a Generations grid, then puts assemble
 
 Source: https://help.runwayml.com/hc/en-us/articles/51601639579667-Creating-with-Runway-Agent
 
-Atelier should not become chat-first. The useful borrowing is:
+Lumen should not become chat-first. The useful borrowing is:
 
 - a three-way **Optimize for: Quality / Balanced / Economy** preference
 - optional confirmation for expensive jobs or batches
@@ -111,7 +111,7 @@ Firefly’s video workflow keeps model configuration in an inspector and conditi
 
 Source: https://helpx.adobe.com/firefly/web/firefly-video-editor/generate-videos/generate-videos-using-kling.html
 
-The main Atelier lesson:
+The main Lumen lesson:
 
 - never show a universal settings form that pretends every model supports the same controls
 - derive controls from a model capability schema
@@ -133,7 +133,7 @@ Frame.io’s comparison viewer supports:
 
 Source: https://help.frame.io/en/articles/9952618-comparison-viewer
 
-Atelier v1 should implement:
+Lumen v1 should implement:
 
 - synchronized A/B video playback
 - linked zoom/pan for images
@@ -151,7 +151,7 @@ Sources:
 - https://docs.midjourney.com/hc/en-us/articles/33329261836941-Getting-Started-Guide
 - https://docs.midjourney.com/hc/en-us/articles/33329462451469
 
-Atelier should preserve the current “single room” for active work and use a dedicated full-screen History/Library surface for retrieval. Do not turn the main workbench into an asset-management dashboard.
+Lumen should preserve the current “single room” for active work and use a dedicated full-screen History/Library surface for retrieval. Do not turn the main workbench into an asset-management dashboard.
 
 ### FLORA and Figma Weave: valuable later, wrong as the default room
 
@@ -168,7 +168,7 @@ Sources:
 - https://weave.figma.com/
 - https://www.uxtools.co/blog/generative-media-workflows-in-ui-design
 
-This is strategically important, but it should be a later **Flows** mode, not Atelier’s default interface. Ryan’s common task is making and reviewing a shot, not authoring a pipeline. A node graph would add learning cost and visual clutter before repeated workflows justify it.
+This is strategically important, but it should be a later **Flows** mode, not Lumen’s default interface. Ryan’s common task is making and reviewing a shot, not authoring a pipeline. A node graph would add learning cost and visual clutter before repeated workflows justify it.
 
 When a workflow repeats often enough, expose it first as a named recipe with a simple form. Only expose its node graph in an advanced editor.
 
@@ -188,7 +188,7 @@ This borrows the durable layout logic of Figma, Lightroom, Capture One, and DaVi
 
 Left:
 
-- Atelier wordmark
+- Lumen wordmark
 - workspace switcher: Maison Tanneurs / Maison Izem
 - project or session title
 
@@ -318,7 +318,7 @@ Use a popover or sheet with:
 
 Krea’s model selector demonstrates the right information hierarchy: visual sample, model name, one-line purpose, relative quality/speed, and cost.
 
-Avoid a marketplace-style wall of models. Atelier should show only models we have deliberately enabled.
+Avoid a marketplace-style wall of models. Lumen should show only models we have deliberately enabled.
 
 ## Review decisions
 
@@ -349,7 +349,7 @@ Keep:
 Change:
 
 - Use Geist for nearly all interface text.
-- Restrict Instrument Serif to the Atelier wordmark and rare project naming.
+- Restrict Instrument Serif to the Lumen wordmark and rare project naming.
 - Remove giant serif status messages.
 - Increase useful density by reducing outer canvas margins and oversized empty regions.
 - Let generated media provide color; the application chrome should stay neutral.
@@ -366,7 +366,7 @@ One stage, one persistent composer, one contextual inspector, one take strip. Qu
 
 Best for: daily image/video generation and review.
 
-Why it wins: shortest path through the common loop; low cognitive load; works before Atelier has dozens of tools.
+Why it wins: shortest path through the common loop; low cognitive load; works before Lumen has dozens of tools.
 
 ### 2. Director Board
 
@@ -393,7 +393,7 @@ Good foundations:
 - `react-resizable-panels` / shadcn Resizable for stage + inspector. MIT.
 - AI Elements Prompt Input as a stronger implementation reference for separating attachments, prompt body, tools, submission, and status. Apache-2.0.
   - https://elements.ai-sdk.dev/components/prompt-input
-- Uppy Core/headless for uploads only if Atelier needs resumable/multi-source queues; otherwise keep the first implementation small and native. MIT.
+- Uppy Core/headless for uploads only if Lumen needs resumable/multi-source queues; otherwise keep the first implementation small and native. MIT.
   - https://uppy.io/
 - React Aria `GridList` for the contact sheet’s selection, range selection, keyboard navigation, drag/drop, async loading, and accessible focus model. Apache-2.0.
   - https://react-spectrum.adobe.com/react-aria/GridList.html

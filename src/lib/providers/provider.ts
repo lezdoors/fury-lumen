@@ -11,7 +11,7 @@ import type {
  * Image models return in seconds and can answer inline. Video models queue the
  * work and take one to four minutes — far past any HTTP route budget. Holding a
  * request open for that long loses the job when the tab closes and blocks the
- * composer, so async providers hand back a handle and Atelier polls for it.
+ * composer, so async providers hand back a handle and Lumen polls for it.
  */
 export type SubmitOutcome =
   | { kind: "complete"; result: GenerationResult }

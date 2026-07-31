@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Atelier — Direct Creative Production",
+  title: "Lumen — Direct Creative Production",
   description: "A restrained, provider-neutral studio for direct image and video generation.",
 };
 

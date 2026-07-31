@@ -65,7 +65,7 @@ function renderProofSvg(input: GenerationInput) {
       <rect width="100%" height="100%" fill="#f1efe9"/>
       <rect x="${width * 0.08}" y="${height * 0.08}" width="${width * 0.84}" height="${height * 0.84}" fill="#fcfbf8" stroke="#d8d3c8"/>
       <line x1="${width * 0.08}" y1="${height * 0.2}" x2="${width * 0.92}" y2="${height * 0.2}" stroke="${accent}" stroke-width="4"/>
-      <text x="${width * 0.12}" y="${height * 0.15}" fill="#171714" font-family="Helvetica, Arial" font-size="${Math.max(24, width * 0.025)}" letter-spacing="6">${escapeXml(brand.code)} · ATELIER PROOF</text>
+      <text x="${width * 0.12}" y="${height * 0.15}" fill="#171714" font-family="Helvetica, Arial" font-size="${Math.max(24, width * 0.025)}" letter-spacing="6">${escapeXml(brand.code)} · LUMEN PROOF</text>
       <text x="${width * 0.12}" y="${height * 0.47}" fill="#171714" font-family="Georgia, serif" font-size="${Math.max(40, width * 0.055)}">${escapeXml(brand.name)}</text>
       <foreignObject x="${width * 0.12}" y="${height * 0.53}" width="${width * 0.7}" height="${height * 0.22}">
         <div xmlns="http://www.w3.org/1999/xhtml" style="font: ${Math.max(20, width * 0.022)}px/1.5 Helvetica,Arial;color:#55534d">${prompt}</div>
@@ -95,7 +95,7 @@ async function renderProofVideo(job: GenerationJob): Promise<Buffer> {
   const [width, height] = videoDimensions(job.aspectRatio);
   const seconds = job.durationSeconds ?? PROOF_RENDER_SECONDS;
   const accent = job.brandId === "maison-tanneurs" ? "0xB4762F" : "0x6F745E";
-  const output = path.join(os.tmpdir(), `atelier-proof-${job.id}.mp4`);
+  const output = path.join(os.tmpdir(), `lumen-proof-${job.id}.mp4`);
 
   const blockWidth = Math.round(width * 0.26);
   const blockHeight = Math.round(height * 0.32);
@@ -111,7 +111,7 @@ async function renderProofVideo(job: GenerationJob): Promise<Buffer> {
   const font = PROOF_FONTS.find((candidate) => existsSync(candidate));
   if (font && (await hasDrawtext())) {
     stages.push(
-      `[ruled]drawtext=fontfile=${font}:text='ATELIER PROOF - no provider charge':x=w*0.06:y=h*0.86:fontsize=${Math.round(height * 0.032)}:fontcolor=white@0.55[out]`,
+      `[ruled]drawtext=fontfile=${font}:text='LUMEN PROOF - no provider charge':x=w*0.06:y=h*0.86:fontsize=${Math.round(height * 0.032)}:fontcolor=white@0.55[out]`,
     );
   } else {
     // Without text, a broken corner rule still marks the asset as synthetic.
@@ -148,7 +148,7 @@ export class MockProvider implements GenerationProvider {
       return {
         kind: "pending",
         providerJobId: `proof-${crypto.randomUUID()}`,
-        providerEndpoint: "atelier/proof-video",
+        providerEndpoint: "lumen/proof-video",
       };
     }
     const assetUrl = await saveGeneratedAsset(

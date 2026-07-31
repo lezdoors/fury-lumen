@@ -8,7 +8,7 @@ import type { GenerationJob } from "./types";
  * Polling is pull-based and driven by whoever is looking at the job. There is no
  * background sweeper: a single-user local console does not need one, and a timer
  * that keeps charging a provider while nobody is watching is exactly the kind of
- * silent spend Atelier exists to avoid.
+ * silent spend Lumen exists to avoid.
  */
 export async function advanceJob(job: GenerationJob): Promise<GenerationJob> {
   if (job.status !== "running" && job.status !== "queued") return job;
