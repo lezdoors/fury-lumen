@@ -5,11 +5,14 @@ Updated 2026-07-31, end of the overnight session.
 ## Where it runs
 
 - **Local** (full function): `PORT=3210 pnpm dev` → http://localhost:3210
-- **Hosted** (preview): https://lumen-omega-roan.vercel.app — Vercel project
-  `lumen` under team `haddaoui`, deployed from `main`.
-- **Intended**: `lumen.raccordement-connect.com`. Attached to the project;
-  waiting on an `A lumen → 76.76.21.21` record at MochaHost, which holds the
-  domain's nameservers (`ns1-4.mysecurecloudhost.com`).
+- **Hosted** (preview): https://www.raccordement-connect.com — Vercel project
+  `lumen` under team `haddaoui`, deployed from `main`. The apex 301s to www.
+  `lumen-omega-roan.vercel.app` remains as the deployment alias.
+
+raccordement-connect.com was repurposed for Lumen on 2026-07-31. Its DNS already
+pointed at Vercel, so attaching the domains to the project was the whole job —
+no registrar change was needed. Vercel's "DNS Change Recommended" badge is a
+nudge toward newer IPs and can be ignored while the current records resolve.
 
 The hosted copy is a preview, not the tool. Vercel gives no writable disk and no
 ffmpeg, so:
