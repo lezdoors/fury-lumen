@@ -1,9 +1,31 @@
 import { execFile } from "node:child_process";
-import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 import { promisify } from "node:util";
 
 const GENERATED_DIR = path.join(process.cwd(), "data", "assets");
+
+/**
+ * Serverless hosts ship a read-only bundle. Probing once tells the rest of the
+ * app whether it can rely on anything surviving a request, which is the
+ * difference between a queue that works and one that loses jobs between
+ * instances.
+ */
+let writable: Promise<boolean> | undefined;
+export function canPersist() {
+  writable ??= (async () => {
+    try {
+      await mkdir(GENERATED_DIR, { recursive: true });
+      const probe = path.join(GENERATED_DIR, ".probe");
+      await writeFile(probe, "1");
+      await unlink(probe).catch(() => undefined);
+      return true;
+    } catch {
+      return false;
+    }
+  })();
+  return writable;
+}
 
 export async function saveGeneratedAsset(
   id: string,

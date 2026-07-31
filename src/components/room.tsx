@@ -118,7 +118,15 @@ export function Room({
       fetch("/api/jobs", { cache: "no-store" }),
     ]);
     setModels(((await modelsResponse.json()) as { models: ProviderModel[] }).models);
-    setJobs(((await jobsResponse.json()) as { jobs: GenerationJob[] }).jobs);
+    const fetched = ((await jobsResponse.json()) as { jobs: GenerationJob[] }).jobs;
+    // Union rather than replace: the server is authoritative for anything it
+    // knows about, but a host without shared storage may not know about a job
+    // this session just created, and dropping it would look like a failure.
+    setJobs((current) => {
+      const known = new Set(fetched.map((job) => job.id));
+      const localOnly = current.filter((job) => !known.has(job.id));
+      return [...fetched, ...localOnly].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    });
   }, []);
 
   // Reading a running job is what advances it — the provider is polled server
@@ -190,10 +198,18 @@ export function Room({
           durationSeconds: selectedModel.mediaKind === "video" ? effectiveDuration : undefined,
         }),
       });
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as { error?: string; job?: GenerationJob };
       if (!response.ok) throw new Error(data.error ?? "Generation failed.");
       setPrompt("");
-      await refresh();
+      // Merge the job the server just returned. On a host without shared
+      // storage a re-fetch can hit an instance that never saw it.
+      if (data.job) {
+        const created = data.job;
+        setJobs((current) =>
+          current.some((job) => job.id === created.id) ? current : [created, ...current],
+        );
+      }
+      await refresh().catch(() => undefined);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Generation failed.");
     } finally {

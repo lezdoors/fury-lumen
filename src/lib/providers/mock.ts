@@ -4,7 +4,7 @@ import { readFile, unlink } from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { promisify } from "node:util";
-import { saveGeneratedAsset } from "../files";
+import { canPersist, saveGeneratedAsset } from "../files";
 import type { GenerationInput, GenerationJob, ProviderModel } from "../types";
 import type { GenerationProvider, PollOutcome, SubmitOutcome } from "./provider";
 
@@ -143,10 +143,25 @@ export class MockProvider implements GenerationProvider {
 
   async submit(input: GenerationInput, model: ProviderModel): Promise<SubmitOutcome> {
     if (model.mediaKind === "video") {
+      // A queued job only works where its record survives between requests.
+      // On a read-only host it would be handed to another instance that has
+      // never heard of it, so the canned clip is returned inline instead.
+      if (!(await canPersist())) {
+        return {
+          kind: "complete",
+          result: { assetUrl: "/proof-sample.mp4", mimeType: "video/mp4", actualCostUsd: 0 },
+        };
+      }
       return {
         kind: "pending",
         providerJobId: `proof-${crypto.randomUUID()}`,
         providerEndpoint: "lumen/proof-video",
+      };
+    }
+    if (!(await canPersist())) {
+      return {
+        kind: "complete",
+        result: { assetUrl: "/proof-sample.jpg", mimeType: "image/jpeg", actualCostUsd: 0 },
       };
     }
     const assetUrl = await saveGeneratedAsset(
