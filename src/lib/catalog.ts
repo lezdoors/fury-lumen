@@ -1,17 +1,4 @@
-import type { BrandId, ProviderModel } from "./types";
-
-export const brands: Record<BrandId, { name: string; code: string; note: string }> = {
-  "maison-tanneurs": {
-    name: "Maison Tanneurs",
-    code: "MT",
-    note: "Leather house · editorial assets only",
-  },
-  "maison-izem": {
-    name: "Maison Izem",
-    code: "MI",
-    note: "Home collection · separate asset lineage",
-  },
-};
+import type { ProviderModel } from "./types";
 
 /**
  * Fal bills video per second of output, so cost is declared per second and the

@@ -2,9 +2,8 @@ import { getModels } from "@/lib/catalog";
 import { getProvider } from "@/lib/providers";
 import { createJob, listJobs, updateJob } from "@/lib/store";
 import { estimateCost } from "@/lib/types";
-import type { AspectRatio, BrandId, GenerationInput, GenerationJob } from "@/lib/types";
+import type { AspectRatio, GenerationInput, GenerationJob } from "@/lib/types";
 
-const brandIds: BrandId[] = ["maison-tanneurs", "maison-izem"];
 const aspectRatios: AspectRatio[] = ["1:1", "4:5", "3:4", "16:9", "9:16"];
 
 export async function GET() {
@@ -20,9 +19,6 @@ export async function POST(request: Request) {
 
   if (!prompt || prompt.length < 3) {
     return Response.json({ error: "Prompt must contain at least three characters." }, { status: 400 });
-  }
-  if (!body.brandId || !brandIds.includes(body.brandId)) {
-    return Response.json({ error: "Choose a valid brand." }, { status: 400 });
   }
   if (!body.aspectRatio || !aspectRatios.includes(body.aspectRatio)) {
     return Response.json({ error: "Choose a valid aspect ratio." }, { status: 400 });
@@ -46,7 +42,6 @@ export async function POST(request: Request) {
   }
 
   const input: GenerationInput = {
-    brandId: body.brandId,
     prompt,
     providerId: model.providerId,
     modelId: model.id,

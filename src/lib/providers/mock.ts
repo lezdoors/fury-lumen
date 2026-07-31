@@ -4,7 +4,6 @@ import { readFile, unlink } from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import { promisify } from "node:util";
-import { brands } from "../catalog";
 import { saveGeneratedAsset } from "../files";
 import type { GenerationInput, GenerationJob, ProviderModel } from "../types";
 import type { GenerationProvider, PollOutcome, SubmitOutcome } from "./provider";
@@ -58,15 +57,14 @@ function videoDimensions(aspectRatio: GenerationInput["aspectRatio"]) {
 
 function renderProofSvg(input: GenerationInput) {
   const [width, height] = dimensions(input.aspectRatio);
-  const brand = brands[input.brandId];
   const prompt = escapeXml(input.prompt.slice(0, 150));
-  const accent = input.brandId === "maison-tanneurs" ? "#8b5d3b" : "#6f745e";
+  const accent = "#b4762f";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
       <rect width="100%" height="100%" fill="#f1efe9"/>
       <rect x="${width * 0.08}" y="${height * 0.08}" width="${width * 0.84}" height="${height * 0.84}" fill="#fcfbf8" stroke="#d8d3c8"/>
       <line x1="${width * 0.08}" y1="${height * 0.2}" x2="${width * 0.92}" y2="${height * 0.2}" stroke="${accent}" stroke-width="4"/>
-      <text x="${width * 0.12}" y="${height * 0.15}" fill="#171714" font-family="Helvetica, Arial" font-size="${Math.max(24, width * 0.025)}" letter-spacing="6">${escapeXml(brand.code)} · LUMEN PROOF</text>
-      <text x="${width * 0.12}" y="${height * 0.47}" fill="#171714" font-family="Georgia, serif" font-size="${Math.max(40, width * 0.055)}">${escapeXml(brand.name)}</text>
+      <text x="${width * 0.12}" y="${height * 0.15}" fill="#171714" font-family="Helvetica, Arial" font-size="${Math.max(24, width * 0.025)}" letter-spacing="6">LUMEN PROOF</text>
+      <text x="${width * 0.12}" y="${height * 0.47}" fill="#171714" font-family="Georgia, serif" font-size="${Math.max(40, width * 0.055)}">Proof render</text>
       <foreignObject x="${width * 0.12}" y="${height * 0.53}" width="${width * 0.7}" height="${height * 0.22}">
         <div xmlns="http://www.w3.org/1999/xhtml" style="font: ${Math.max(20, width * 0.022)}px/1.5 Helvetica,Arial;color:#55534d">${prompt}</div>
       </foreignObject>
@@ -94,7 +92,7 @@ function hasDrawtext() {
 async function renderProofVideo(job: GenerationJob): Promise<Buffer> {
   const [width, height] = videoDimensions(job.aspectRatio);
   const seconds = job.durationSeconds ?? PROOF_RENDER_SECONDS;
-  const accent = job.brandId === "maison-tanneurs" ? "0xB4762F" : "0x6F745E";
+  const accent = "0xB4762F";
   const output = path.join(os.tmpdir(), `lumen-proof-${job.id}.mp4`);
 
   const blockWidth = Math.round(width * 0.26);

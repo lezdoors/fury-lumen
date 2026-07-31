@@ -22,24 +22,29 @@ workspaces. Every generation records model, prompt, cost and provenance in
 
 ## Design register — locked
 
-**Roobinium**, chosen 2026-07-31, applied whole — including the colours.
-Saturated orange band across the top falling to true black before the content
-area, warm-black grounds carrying real red chroma (never neutral grey), warm
-glass panels, a lit-sphere action button, orange-tinted active states.
+**AgentFlow**, applied whole including the white lower half.
 
-Chosen over AgentFlow because it is the only complete dark palette of the three:
-AgentFlow's colour story depends on a dark-to-white gradient whose white half is
-wrong for judging footage, so adopting it meant adopting half a palette.
-Roobinium needs no exclusions — its own working screens already put content on
-black and hold the orange in the top band and on controls.
+Charcoal top carrying an architectural grid with hatched cells, an orange bloom
+through the middle, a light frosted ask-box floating in it, and the library on
+the light ground below. Accent phrase in orange italic serif with a rule under
+it. Action is a lit sphere. Cost sits beside it in real dollars.
 
-The earlier accent sat at 0.120 chroma and read brown. It is now 0.205.
+Two structural rules learned the hard way:
+- The dark-to-light run is a fixed-height block (`.page__sky`), not a percentage
+  ramp over the document. Page percentages put the light section thousands of
+  pixels below where it is needed once the grid is long, and the library ends up
+  on orange with unreadable dark type.
+- `.results` owns its own light background so it can never inherit the bloom.
 
-**The one rule that is not a preference:** the stage stays neutral. Grain, grid
-and bloom all sit at `z-index: -1/-2` behind an opaque stage. A coloured or
-textured immediate surround measurably shifts how a take reads, and this is a
-tool for deciding whether a take is right. Decorate the chrome, never the stage.
-`.empty-stage` may glow — no media is present.
+## What Lumen is
+
+A general generation tool — our own Higgsfield. One box: describe it, pick a
+model, generate; results land in a grid; you pay per generation in real dollars
+and always see the price before you click.
+
+It is NOT brand-scoped. Early builds inherited Maison Tanneurs / Maison Izem
+workspaces and A/B/C/D take letters from the first scaffold. Both were removed
+on 2026-07-31 — Higgsfield has neither, and neither belongs here.
 
 ## Not done
 

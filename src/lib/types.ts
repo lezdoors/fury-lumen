@@ -1,11 +1,14 @@
-export type BrandId = "maison-tanneurs" | "maison-izem";
+/** Legacy. Early builds scoped work to two brand workspaces; Lumen is a
+ *  general tool, so nothing writes this any more and nothing reads it to
+ *  decide behaviour. Kept only so existing records in data/jobs.json parse. */
+export type BrandId = string;
 export type JobStatus = "queued" | "running" | "completed" | "failed";
 export type ReviewStatus = "unreviewed" | "approved" | "rejected";
 export type MediaKind = "image" | "video";
 export type AspectRatio = "1:1" | "4:5" | "3:4" | "16:9" | "9:16";
 
 export interface GenerationInput {
-  brandId: BrandId;
+  brandId?: BrandId;
   prompt: string;
   providerId: string;
   modelId: string;
