@@ -52,10 +52,11 @@
   /* AgentFlow register: a real light source low in the frame, not a flat tint.
      Two lobes so the falloff reads as light rather than as a gradient swatch. */
   --bloom-warm:
-    radial-gradient(78% 52% at 50% 104%, oklch(62% 0.135 58 / 0.42) 0%, transparent 70%),
-    radial-gradient(130% 86% at 50% 116%, oklch(44% 0.095 52 / 0.5) 0%, transparent 66%);
+    radial-gradient(64% 44% at 50% 100%, oklch(74% 0.170 55 / 0.60) 0%, transparent 72%),
+    radial-gradient(96% 62% at 50% 108%, oklch(60% 0.140 48 / 0.48) 0%, transparent 70%),
+    radial-gradient(150% 92% at 50% 120%, oklch(42% 0.085 45 / 0.55) 0%, transparent 68%);
   /* Architectural grid, sized so it reads as structure and never as a texture swatch. */
-  --grid-line: oklch(100% 0 0 / 0.022);
+  --grid-line: oklch(100% 0 0 / 0.030);
   --grid-size: 7.5rem;
   /* Grain keeps large flat fields from banding on an OLED panel. */
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");

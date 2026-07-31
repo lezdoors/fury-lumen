@@ -216,24 +216,29 @@ export function Room({
 
   return (
     <main className="room" data-room-state={roomState}>
+      <div className="room__hatch" aria-hidden="true"><i /><i /><i /><i /></div>
+
       <header className="room__bar">
         <button className="wordmark" onClick={() => setSelectedId(null)}>Lumen</button>
 
         <div className="project-name">
-          {(Object.keys(brands) as BrandId[]).map((id) => (
-            <button
-              key={id}
-              className="text-action"
-              aria-pressed={brandId === id}
-              onClick={() => {
-                setBrandId(id);
-                setSelectedId(null);
-              }}
-              style={{ color: brandId === id ? "var(--color-ink)" : undefined }}
-            >
-              {brands[id].name}
-            </button>
-          ))}
+          <div className="segmented" role="group" aria-label="Workspace">
+            {(Object.keys(brands) as BrandId[]).map((id) => (
+              <button
+                key={id}
+                className="segment"
+                aria-pressed={brandId === id}
+                title={brands[id].note}
+                onClick={() => {
+                  setBrandId(id);
+                  setSelectedId(null);
+                }}
+              >
+                <span className="segment__code">{brands[id].code}</span>
+                {brands[id].name}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="room__status">
@@ -255,11 +260,16 @@ export function Room({
               <span className="frame-index">NEW SHOT</span>
               <div className="frame-mark frame-mark--a" />
               <div className="frame-mark frame-mark--b" />
-              <p>
-                {brandJobs.length === 0
-                  ? "Nothing in this workspace yet. Describe a shot below."
-                  : "Pick a take below, or describe the next shot."}
-              </p>
+              <div className="empty-stage__copy">
+                <p>
+                  {brandJobs.length === 0
+                    ? "No takes in this workspace yet."
+                    : "Pick a take below, or describe the next shot."}
+                </p>
+                <span>
+                  Describe the shot, then <kbd>⌘</kbd><kbd>↵</kbd>
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -388,19 +398,36 @@ export function Room({
           rows={3}
         />
         <div className="composer__footer">
-          <button type="button" className="config-line" onClick={() => setSettingsOpen(true)}>
-            {selectedModel ? selectedModel.label : "No model"}
-            {selectedModel?.mediaKind === "video" ? ` · ${effectiveDuration}s` : ""} · {ratio}
-            <span>Configure</span>
-          </button>
-          <span />
-          {error && <span style={{ color: "var(--color-error)", fontSize: "var(--text-xs)" }}>{error}</span>}
-          <button
-            className="generate-action"
-            disabled={!selectedModel?.available || !prompt.trim() || isSubmitting}
-          >
-            {isSubmitting ? "Submitting…" : `Generate · ${money(cost)}`} <span>⌘↵</span>
-          </button>
+          <div className="composer__left">
+            <button
+              type="button"
+              className="round-action"
+              title="Reference frame — coming with image-to-video"
+              aria-label="Add a reference frame"
+              disabled
+            >
+              +
+            </button>
+            <button type="button" className="config-line" onClick={() => setSettingsOpen(true)}>
+              {selectedModel ? selectedModel.label : "No model"}
+              {selectedModel?.mediaKind === "video" ? ` · ${effectiveDuration}s` : ""} · {ratio}
+              <span>Configure</span>
+            </button>
+          </div>
+
+          <div className="composer__right">
+            {error && <span className="composer__error">{error}</span>}
+            <span className="composer__cost">
+              {isSubmitting ? "Submitting…" : money(cost)}
+            </span>
+            <button
+              className="generate-action"
+              aria-label={`Generate for ${money(cost)}`}
+              disabled={!selectedModel?.available || !prompt.trim() || isSubmitting}
+            >
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
       </form>
 
