@@ -2,6 +2,26 @@
 
 Updated 2026-07-31, end of the overnight session.
 
+## Where it runs
+
+- **Local** (full function): `PORT=3210 pnpm dev` → http://localhost:3210
+- **Hosted** (preview): https://lumen-omega-roan.vercel.app — Vercel project
+  `lumen` under team `haddaoui`, deployed from `main`.
+- **Intended**: `lumen.raccordement-connect.com`. Attached to the project;
+  waiting on an `A lumen → 76.76.21.21` record at MochaHost, which holds the
+  domain's nameservers (`ns1-4.mysecurecloudhost.com`).
+
+The hosted copy is a preview, not the tool. Vercel gives no writable disk and no
+ffmpeg, so:
+- generation history does not persist and is not shared between instances;
+- Proof mode returns a shipped sample clip inline instead of rendering one.
+
+That second point is not cosmetic. A queued job needs its record to survive
+between requests; on a stateless host the poll lands on an instance that never
+saw it and the generation 404s mid-flight. `canPersist()` probes the disk once
+and decides. Real work stays local until jobs live in a database and assets in
+blob storage.
+
 ## Run it
 
 ```bash
