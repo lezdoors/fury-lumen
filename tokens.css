@@ -49,7 +49,16 @@
 
   /* Warmth lives in the periphery only. It must never sit between the eye and a
      take — a coloured immediate surround shifts how the media reads. */
-  --bloom-warm: radial-gradient(120% 90% at 50% 108%, oklch(38% 0.075 62 / 0.55) 0%, transparent 62%);
+  /* AgentFlow register: a real light source low in the frame, not a flat tint.
+     Two lobes so the falloff reads as light rather than as a gradient swatch. */
+  --bloom-warm:
+    radial-gradient(78% 52% at 50% 104%, oklch(62% 0.135 58 / 0.42) 0%, transparent 70%),
+    radial-gradient(130% 86% at 50% 116%, oklch(44% 0.095 52 / 0.5) 0%, transparent 66%);
+  /* Architectural grid, sized so it reads as structure and never as a texture swatch. */
+  --grid-line: oklch(100% 0 0 / 0.022);
+  --grid-size: 7.5rem;
+  /* Grain keeps large flat fields from banding on an OLED panel. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   --shadow-float: 0 1px 2px oklch(0% 0 0 / 0.4), 0 12px 32px oklch(0% 0 0 / 0.45);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
