@@ -1,10 +1,10 @@
-import { Studio } from "@/components/studio";
+import { Room } from "@/components/room";
 import { getModels } from "@/lib/catalog";
 import { listJobs } from "@/lib/store";
+import "./room.css";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const initialJobs = await listJobs();
-  return <Studio initialModels={getModels()} initialJobs={initialJobs} />;
+  return <Room initialModels={getModels()} initialJobs={await listJobs()} />;
 }
