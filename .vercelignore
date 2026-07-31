@@ -1,0 +1,7 @@
+# Local generation history and assets are development artifacts. A hosted copy
+# starts empty and users generate their own; shipping local test data to a
+# public URL is neither useful nor intended.
+data/
+graphify-out/
+UI-RESEARCH.md
+.hallmark/
