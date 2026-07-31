@@ -353,8 +353,17 @@ export function Room({
               onClick={() => setSelectedId(job.id)}
               aria-pressed={job.id === selectedId}
             >
-              <span className="take__image">{LETTERS[index] ?? "·"}</span>
-              <span>
+              <span className="take__image">
+                <span className="take__letter">{LETTERS[index] ?? "·"}</span>
+                {job.assetUrl && isVideo(job) && (
+                  <video src={`${job.assetUrl}#t=0.1`} muted playsInline preload="metadata" />
+                )}
+                {job.assetUrl && !isVideo(job) && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={job.assetUrl} alt="" />
+                )}
+              </span>
+              <span className="take__meta">
                 <strong>{job.prompt.slice(0, 40)}</strong>
                 <small>
                   {job.status === "completed"

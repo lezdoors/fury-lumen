@@ -41,8 +41,16 @@
   --space-3xl: 6rem;
 
   --rule-thin: 1px;
-  --radius-control: 0.25rem;
-  --radius-stage: 0.125rem;
+  /* Artlist/Higgsfield register: generous radii, pills on actions. Near-square
+     corners were what made this read as a utility panel rather than a media tool. */
+  --radius-control: 0.75rem;
+  --radius-stage: 1rem;
+  --radius-pill: 999px;
+
+  /* Warmth lives in the periphery only. It must never sit between the eye and a
+     take — a coloured immediate surround shifts how the media reads. */
+  --bloom-warm: radial-gradient(120% 90% at 50% 108%, oklch(38% 0.075 62 / 0.55) 0%, transparent 62%);
+  --shadow-float: 0 1px 2px oklch(0% 0 0 / 0.4), 0 12px 32px oklch(0% 0 0 / 0.45);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
