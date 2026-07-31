@@ -169,8 +169,15 @@ export class MockProvider implements GenerationProvider {
       };
     }
     try {
-      const bytes = await renderProofVideo(job);
-      const assetUrl = await saveGeneratedAsset(crypto.randomUUID(), "mp4", bytes);
+      let assetUrl: string;
+      try {
+        const bytes = await renderProofVideo(job);
+        assetUrl = await saveGeneratedAsset(crypto.randomUUID(), "mp4", bytes);
+      } catch {
+        // No ffmpeg or no writable disk — a hosted copy still gets a real clip
+        // so the whole loop stays demonstrable.
+        assetUrl = "/proof-sample.mp4";
+      }
       return {
         kind: "complete",
         result: {

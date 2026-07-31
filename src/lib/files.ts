@@ -10,9 +10,9 @@ export async function saveGeneratedAsset(
   extension: string,
   contents: Buffer | string,
 ): Promise<string> {
-  await mkdir(GENERATED_DIR, { recursive: true });
   const safeExtension = extension.replace(/[^a-z0-9]/gi, "").toLowerCase() || "bin";
   const filename = `${id}.${safeExtension}`;
+  await mkdir(GENERATED_DIR, { recursive: true });
   await writeFile(path.join(GENERATED_DIR, filename), contents);
   return `/api/assets/${filename}`;
 }

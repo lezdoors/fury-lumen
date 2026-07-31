@@ -6,20 +6,44 @@ const DATA_DIR = path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIR, "jobs.json");
 let writeChain = Promise.resolve();
 
+/**
+ * Serverless hosts give no writable disk, so history lives in memory there and
+ * resets with the instance. Failing the write instead would make every
+ * generation look broken on a hosted copy.
+ */
+let memoryJobs: GenerationJob[] | undefined;
+const ephemeral = () => memoryJobs !== undefined;
+
 async function readJobs(): Promise<GenerationJob[]> {
+  if (ephemeral()) return memoryJobs as GenerationJob[];
   try {
     return JSON.parse(await readFile(DATA_FILE, "utf8")) as GenerationJob[];
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") return [];
+    if (code === "EROFS" || code === "EACCES") {
+      memoryJobs = [];
+      return memoryJobs;
+    }
     throw error;
   }
 }
 
 async function writeJobs(jobs: GenerationJob[]) {
-  await mkdir(DATA_DIR, { recursive: true });
-  const temporary = `${DATA_FILE}.tmp`;
-  await writeFile(temporary, JSON.stringify(jobs, null, 2));
-  await rename(temporary, DATA_FILE);
+  if (ephemeral()) {
+    memoryJobs = jobs;
+    return;
+  }
+  try {
+    await mkdir(DATA_DIR, { recursive: true });
+    const temporary = `${DATA_FILE}.tmp`;
+    await writeFile(temporary, JSON.stringify(jobs, null, 2));
+    await rename(temporary, DATA_FILE);
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code !== "EROFS" && code !== "EACCES" && code !== "ENOENT") throw error;
+    memoryJobs = jobs;
+  }
 }
 
 export async function listJobs() {

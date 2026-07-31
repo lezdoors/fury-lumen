@@ -333,9 +333,18 @@ export function Room({
                   {job.assetUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={isVideo(job) ? `${job.assetUrl}?poster=1` : job.assetUrl}
+                      src={
+                        job.assetUrl === "/proof-sample.mp4"
+                          ? "/proof-sample.jpg"
+                          : isVideo(job)
+                            ? `${job.assetUrl}?poster=1`
+                            : job.assetUrl
+                      }
                       alt=""
                       loading="lazy"
+                      onError={(event) => {
+                        event.currentTarget.src = "/proof-sample.jpg";
+                      }}
                     />
                   )}
                   {!job.assetUrl && (
