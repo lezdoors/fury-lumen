@@ -1,10 +1,11 @@
 import { getModels } from "@/lib/catalog";
 import { getProvider } from "@/lib/providers";
 import { createJob, listJobs, updateJob } from "@/lib/store";
-import type { BrandId, GenerationInput, GenerationJob } from "@/lib/types";
+import { estimateCost } from "@/lib/types";
+import type { AspectRatio, BrandId, GenerationInput, GenerationJob } from "@/lib/types";
 
 const brandIds: BrandId[] = ["maison-tanneurs", "maison-izem"];
-const aspectRatios = ["1:1", "4:5", "3:4", "16:9", "9:16"];
+const aspectRatios: AspectRatio[] = ["1:1", "4:5", "3:4", "16:9", "9:16"];
 
 export async function GET() {
   return Response.json({ jobs: await listJobs() });
@@ -30,6 +31,15 @@ export async function POST(request: Request) {
     return Response.json({ error: model?.availabilityReason ?? "Model is unavailable." }, { status: 400 });
   }
 
+  const durationSeconds =
+    model.mediaKind === "video" ? (body.durationSeconds ?? model.durations?.[0] ?? 5) : undefined;
+  if (durationSeconds !== undefined && model.durations && !model.durations.includes(durationSeconds)) {
+    return Response.json(
+      { error: `${model.label} accepts ${model.durations.join(" or ")} seconds.` },
+      { status: 400 },
+    );
+  }
+
   const provider = getProvider(model.providerId);
   if (!provider) {
     return Response.json({ error: "Provider adapter is unavailable." }, { status: 400 });
@@ -41,27 +51,40 @@ export async function POST(request: Request) {
     providerId: model.providerId,
     modelId: model.id,
     mediaKind: model.mediaKind,
-    aspectRatio: body.aspectRatio as GenerationInput["aspectRatio"],
+    aspectRatio: body.aspectRatio,
+    durationSeconds,
     referenceUrls: body.referenceUrls ?? [],
   };
   const job: GenerationJob = {
     ...input,
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
-    status: "running",
+    status: "queued",
     reviewStatus: "unreviewed",
-    estimatedCostUsd: model.estimatedCostUsd,
+    estimatedCostUsd: estimateCost(model, durationSeconds),
   };
   await createJob(job);
 
   try {
-    const result = await provider.generate(input, model);
+    const outcome = await provider.submit(input, model);
+
+    // Async providers hand back a handle. The response returns straight away so
+    // the composer stays usable; the client polls GET /api/jobs/:id from there.
+    if (outcome.kind === "pending") {
+      const queued = await updateJob(job.id, {
+        status: "running",
+        providerJobId: outcome.providerJobId,
+        providerEndpoint: outcome.providerEndpoint,
+      });
+      return Response.json({ job: queued }, { status: 202 });
+    }
+
     const completed = await updateJob(job.id, {
       status: "completed",
       completedAt: new Date().toISOString(),
-      assetUrl: result.assetUrl,
-      mimeType: result.mimeType,
-      actualCostUsd: result.actualCostUsd,
+      assetUrl: outcome.result.assetUrl,
+      mimeType: outcome.result.mimeType,
+      actualCostUsd: outcome.result.actualCostUsd,
     });
     return Response.json({ job: completed }, { status: 201 });
   } catch (error) {

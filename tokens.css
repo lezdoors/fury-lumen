@@ -1,0 +1,59 @@
+/* Hallmark · tokens: Single Room · genre: atmospheric · theme: Midnight */
+:root {
+  --color-paper: oklch(14% 0.010 65);
+  --color-paper-2: oklch(18% 0.012 65);
+  --color-paper-3: oklch(22% 0.012 65);
+  --color-stage: oklch(10% 0.009 65);
+  --color-rule: oklch(31% 0.012 65);
+  --color-rule-strong: oklch(42% 0.014 65);
+  --color-neutral: oklch(66% 0.010 65);
+  --color-muted: oklch(75% 0.009 65);
+  --color-ink: oklch(94% 0.010 78);
+  --color-ink-soft: oklch(86% 0.012 78);
+  --color-accent: oklch(68% 0.120 67);
+  --color-accent-ink: oklch(15% 0.020 65);
+  --color-focus: oklch(79% 0.125 72);
+  --color-error: oklch(67% 0.145 28);
+  --color-success: oklch(72% 0.085 145);
+  --color-scrim: oklch(8% 0.008 65 / 0.82);
+
+  --font-display: "Geist", "Switzer", ui-sans-serif, sans-serif;
+  --font-body: "Geist", "Switzer", ui-sans-serif, sans-serif;
+  --font-outlier: "Instrument Serif", "Newsreader", ui-serif, serif;
+  --font-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 1rem;
+  --text-md: 1.25rem;
+  --text-lg: 1.5625rem;
+  --text-xl: 1.953rem;
+  --text-display: clamp(2.4rem, 4vw + 1rem, 4.75rem);
+
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  --rule-thin: 1px;
+  --radius-control: 0.25rem;
+  --radius-stage: 0.125rem;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 200ms;
+  --dur-long: 360ms;
+
+  --z-base: 1;
+  --z-raised: 10;
+  --z-sticky: 200;
+  --z-modal: 400;
+  --z-tooltip: 600;
+}

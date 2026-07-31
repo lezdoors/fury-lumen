@@ -1,0 +1,9 @@
+{
+  "scannedAt": "2026-07-30",
+  "framework": "Next.js 16 / React 19 / Tailwind 4",
+  "fontStack": "Existing serif + sans; prototype adds Geist, Instrument Serif, Geist Mono",
+  "palette": "Existing warm paper system; prototype isolates an atmospheric dark system",
+  "motion": "No motion library; CSS-only functional motion",
+  "spacing": "4pt token scale",
+  "preserved": ["working root route", "brand separation", "provider-neutral architecture"]
+}

@@ -1,0 +1,82 @@
+{
+  "app/api/assets/[filename]/route.ts": {
+    "mtime": 1785469901.6866534,
+    "ast_hash": "44692665c6c739f9b782c00c839fbf9a",
+    "semantic_hash": "44692665c6c739f9b782c00c839fbf9a"
+  },
+  "app/api/jobs/[id]/route.ts": {
+    "mtime": 1785469651.0559044,
+    "ast_hash": "2c13d54c14608d80f67f9164fdd62168",
+    "semantic_hash": "2c13d54c14608d80f67f9164fdd62168"
+  },
+  "app/api/jobs/route.ts": {
+    "mtime": 1785469649.908168,
+    "ast_hash": "58c3b288cbd0244124ffe552e23213ca",
+    "semantic_hash": "58c3b288cbd0244124ffe552e23213ca"
+  },
+  "app/api/models/route.ts": {
+    "mtime": 1785469648.5357132,
+    "ast_hash": "f8dd0c9d69a7359656a99b9e647a7111",
+    "semantic_hash": "f8dd0c9d69a7359656a99b9e647a7111"
+  },
+  "app/layout.tsx": {
+    "mtime": 1785469772.430887,
+    "ast_hash": "f0fb12659b2a157486b4627734b97e4c",
+    "semantic_hash": "f0fb12659b2a157486b4627734b97e4c"
+  },
+  "app/page.tsx": {
+    "mtime": 1785469990.8036683,
+    "ast_hash": "7f249936da9cf6b51f008756feb74ba2",
+    "semantic_hash": "7f249936da9cf6b51f008756feb74ba2"
+  },
+  "app/prototype/page.tsx": {
+    "mtime": 1785471007.5059752,
+    "ast_hash": "8cbd0cb8661226cda4712ebd84904b43",
+    "semantic_hash": "8cbd0cb8661226cda4712ebd84904b43"
+  },
+  "components/studio.tsx": {
+    "mtime": 1785469809.5818698,
+    "ast_hash": "b15c2276e735840fa78aa059a4e4d936",
+    "semantic_hash": "b15c2276e735840fa78aa059a4e4d936"
+  },
+  "lib/catalog.ts": {
+    "mtime": 1785469640.4326992,
+    "ast_hash": "ced7f419f6a1ac5ffa54548772706472",
+    "semantic_hash": "ced7f419f6a1ac5ffa54548772706472"
+  },
+  "lib/files.ts": {
+    "mtime": 1785469900.3455687,
+    "ast_hash": "3ca295d6ceb1b25ec5f985071bec3c6b",
+    "semantic_hash": "3ca295d6ceb1b25ec5f985071bec3c6b"
+  },
+  "lib/providers/index.ts": {
+    "mtime": 1785469646.223955,
+    "ast_hash": "349220ac71a1426535cf9ce3d2497dc8",
+    "semantic_hash": "349220ac71a1426535cf9ce3d2497dc8"
+  },
+  "lib/providers/mock.ts": {
+    "mtime": 1785469823.2549632,
+    "ast_hash": "7284f53a949bec1ebe87be066fc85e24",
+    "semantic_hash": "7284f53a949bec1ebe87be066fc85e24"
+  },
+  "lib/providers/openai.ts": {
+    "mtime": 1785469645.0782955,
+    "ast_hash": "768014984b61578e9102d9048c4f07e4",
+    "semantic_hash": "768014984b61578e9102d9048c4f07e4"
+  },
+  "lib/providers/provider.ts": {
+    "mtime": 1785469641.6271951,
+    "ast_hash": "4eec81de4bd8545c707c8ad7b7689264",
+    "semantic_hash": "4eec81de4bd8545c707c8ad7b7689264"
+  },
+  "lib/store.ts": {
+    "mtime": 1785469822.090554,
+    "ast_hash": "012cbf97d3a5653a60628c02abd1e749",
+    "semantic_hash": "012cbf97d3a5653a60628c02abd1e749"
+  },
+  "lib/types.ts": {
+    "mtime": 1785469638.8490603,
+    "ast_hash": "a77d760e54cfb266b46e9091d7ffa836",
+    "semantic_hash": "a77d760e54cfb266b46e9091d7ffa836"
+  }
+}

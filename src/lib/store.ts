@@ -26,6 +26,10 @@ export async function listJobs() {
   return (await readJobs()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+export async function getJob(id: string) {
+  return (await readJobs()).find((job) => job.id === id);
+}
+
 export async function createJob(job: GenerationJob) {
   writeChain = writeChain.then(async () => {
     const jobs = await readJobs();

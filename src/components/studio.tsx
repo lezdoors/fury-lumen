@@ -1,13 +1,19 @@
 "use client";
 
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { brands } from "@/lib/catalog";
+import { estimateCost } from "@/lib/types";
 import type { BrandId, GenerationJob, ProviderModel, ReviewStatus } from "@/lib/types";
 
 const ratios = ["1:1", "4:5", "3:4", "16:9", "9:16"] as const;
+const POLL_INTERVAL_MS = 2500;
 
 function money(value: number | undefined) {
   return `$${(value ?? 0).toFixed(3)}`;
+}
+
+function isVideo(job: GenerationJob) {
+  return job.mediaKind === "video" || job.mimeType?.startsWith("video/");
 }
 
 export function Studio({
@@ -25,6 +31,7 @@ export function Studio({
     `${initialModels[0]?.providerId}:${initialModels[0]?.id}`,
   );
   const [jobs, setJobs] = useState<GenerationJob[]>(initialJobs);
+  const [duration, setDuration] = useState(5);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
 
@@ -44,6 +51,41 @@ export function Studio({
   const selectedModel = models.find(
     (model) => `${model.providerId}:${model.id}` === modelKey,
   );
+
+  const pending = useMemo(
+    () => jobs.filter((job) => job.status === "running" || job.status === "queued"),
+    [jobs],
+  );
+
+  // Queued work only advances when someone asks about it. Reading a running job
+  // is what drives its provider poll, so the interval stops the moment the last
+  // job settles — no idle traffic, no provider calls nobody asked for.
+  useEffect(() => {
+    if (pending.length === 0) return;
+    const timer = setInterval(async () => {
+      const settled = await Promise.all(
+        pending.map(async (job) => {
+          const response = await fetch(`/api/jobs/${job.id}`, { cache: "no-store" });
+          if (!response.ok) return undefined;
+          return ((await response.json()) as { job: GenerationJob }).job;
+        }),
+      );
+      const updates = settled.filter(Boolean) as GenerationJob[];
+      if (updates.length === 0) return;
+      setJobs((current) =>
+        current.map((job) => updates.find((update) => update.id === job.id) ?? job),
+      );
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [pending]);
+
+  // Switching models can invalidate the held duration. Derive the effective one
+  // rather than writing state back from an effect.
+  const allowedDurations = selectedModel?.durations;
+  const effectiveDuration =
+    allowedDurations?.length && !allowedDurations.includes(duration)
+      ? allowedDurations[0]
+      : duration;
   const brandJobs = useMemo(
     () => jobs.filter((job) => job.brandId === brandId),
     [brandId, jobs],
@@ -70,6 +112,7 @@ export function Studio({
           providerId: selectedModel.providerId,
           modelId: selectedModel.id,
           mediaKind: selectedModel.mediaKind,
+          durationSeconds: selectedModel.mediaKind === "video" ? effectiveDuration : undefined,
         }),
       });
       const data = (await response.json()) as { error?: string };
@@ -189,9 +232,28 @@ export function Studio({
                   ))}
                 </div>
               </fieldset>
+              {selectedModel?.mediaKind === "video" && (
+                <fieldset>
+                  <legend>Duration</legend>
+                  <div className="ratio-row">
+                    {(selectedModel.durations ?? [5]).map((value) => (
+                      <button
+                        type="button"
+                        key={value}
+                        className={effectiveDuration === value ? "selected" : ""}
+                        onClick={() => setDuration(value)}
+                      >
+                        {value}s
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
               <div className="cost-box">
                 <span>Estimated provider cost</span>
-                <strong>{money(selectedModel?.estimatedCostUsd)}</strong>
+                <strong>
+                  {selectedModel ? money(estimateCost(selectedModel, effectiveDuration)) : money(0)}
+                </strong>
               </div>
               <button className="generate-button" disabled={isGenerating || !selectedModel?.available}>
                 {isGenerating ? "GENERATING…" : "GENERATE"}
@@ -224,12 +286,18 @@ export function Studio({
               {brandJobs.map((job) => (
                 <article className="asset-card" key={job.id}>
                   <div className={`asset-frame ratio-${job.aspectRatio.replace(":", "-")}`}>
-                    {job.assetUrl ? (
+                    {job.assetUrl && isVideo(job) ? (
+                      <video src={job.assetUrl} controls loop playsInline preload="metadata" />
+                    ) : job.assetUrl ? (
                       // Generated assets can be local or returned by an approved provider.
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={job.assetUrl} alt={job.prompt} />
                     ) : (
-                      <div className="asset-placeholder">{job.status}</div>
+                      <div className="asset-placeholder">
+                        {job.status === "running" || job.status === "queued"
+                          ? `Generating${job.queuePosition ? ` · queue ${job.queuePosition}` : "…"}`
+                          : job.status}
+                      </div>
                     )}
                     <span className={`review-badge ${job.reviewStatus}`}>{job.reviewStatus}</span>
                   </div>

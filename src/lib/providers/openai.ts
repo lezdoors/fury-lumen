@@ -1,6 +1,6 @@
 import { saveGeneratedAsset } from "../files";
-import type { GenerationInput, GenerationResult, ProviderModel } from "../types";
-import type { GenerationProvider } from "./provider";
+import type { GenerationInput, ProviderModel } from "../types";
+import type { GenerationProvider, SubmitOutcome } from "./provider";
 
 function openAISize(aspectRatio: GenerationInput["aspectRatio"]) {
   if (aspectRatio === "1:1") return "1024x1024";
@@ -10,12 +10,14 @@ function openAISize(aspectRatio: GenerationInput["aspectRatio"]) {
 export class OpenAIImageProvider implements GenerationProvider {
   id = "openai";
 
-  async generate(input: GenerationInput, model: ProviderModel): Promise<GenerationResult> {
+  async submit(input: GenerationInput, model: ProviderModel): Promise<SubmitOutcome> {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey || !process.env.OPENAI_IMAGE_MODEL) {
       throw new Error("OpenAI direct is not configured.");
     }
 
+    // response_format is deliberately omitted: gpt-image-* rejects it and always
+    // returns b64, while dall-e-* defaults to a URL. Both shapes are handled below.
     const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
@@ -26,7 +28,6 @@ export class OpenAIImageProvider implements GenerationProvider {
         model: model.id,
         prompt: input.prompt,
         size: openAISize(input.aspectRatio),
-        response_format: "b64_json",
       }),
     });
 
@@ -45,10 +46,16 @@ export class OpenAIImageProvider implements GenerationProvider {
         "png",
         Buffer.from(result.b64_json, "base64"),
       );
-      return { assetUrl, mimeType: "image/png", actualCostUsd: model.estimatedCostUsd };
+      return {
+        kind: "complete",
+        result: { assetUrl, mimeType: "image/png", actualCostUsd: model.estimatedCostUsd },
+      };
     }
     if (result?.url) {
-      return { assetUrl: result.url, mimeType: "image/png", actualCostUsd: model.estimatedCostUsd };
+      return {
+        kind: "complete",
+        result: { assetUrl: result.url, mimeType: "image/png", actualCostUsd: model.estimatedCostUsd },
+      };
     }
     throw new Error("OpenAI returned no image asset.");
   }
