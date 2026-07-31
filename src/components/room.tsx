@@ -2,7 +2,6 @@
 
 import {
   FormEvent,
-  SyntheticEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -30,22 +29,6 @@ function isVideo(job: GenerationJob) {
 
 function modelKeyOf(model: Pick<ProviderModel, "providerId" | "id">) {
   return `${model.providerId}:${model.id}`;
-}
-
-/**
- * Chrome paints a poster from a `#t=` media fragment; Safari holds black until
- * the element is actually seeked. Nudging currentTime once metadata lands makes
- * result thumbnails render in every browser.
- */
-function paintFirstFrame(event: SyntheticEvent<HTMLVideoElement>) {
-  const video = event.currentTarget;
-  if (video.currentTime < 0.05 && Number.isFinite(video.duration)) {
-    try {
-      video.currentTime = Math.min(0.1, video.duration / 2);
-    } catch {
-      // A provider URL that refuses range requests keeps its black frame.
-    }
-  }
 }
 
 export function Room({
@@ -284,18 +267,13 @@ export function Room({
                 aria-label={job.prompt}
               >
                 <span className="card__media">
-                  {job.assetUrl && isVideo(job) && (
-                    <video
-                      src={`${job.assetUrl}#t=0.1`}
-                      muted
-                      playsInline
-                      preload="metadata"
-                      onLoadedMetadata={paintFirstFrame}
-                    />
-                  )}
-                  {job.assetUrl && !isVideo(job) && (
+                  {job.assetUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={job.assetUrl} alt="" />
+                    <img
+                      src={isVideo(job) ? `${job.assetUrl}?poster=1` : job.assetUrl}
+                      alt=""
+                      loading="lazy"
+                    />
                   )}
                   {!job.assetUrl && (
                     <span className="card__status">

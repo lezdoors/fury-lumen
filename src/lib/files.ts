@@ -1,5 +1,7 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import * as path from "node:path";
+import { promisify } from "node:util";
 
 const GENERATED_DIR = path.join(process.cwd(), "data", "assets");
 
@@ -22,5 +24,48 @@ export async function readGeneratedAsset(filename: string) {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
     throw error;
+  }
+}
+
+const run = promisify(execFile);
+
+/**
+ * First frame of a video as a JPEG, rendered once and cached beside the source.
+ *
+ * Safari will not paint a poster from `<video preload="metadata">`, so a library
+ * built from video elements shows blank tiles there. Images also mean the grid
+ * costs N decodes of a small JPEG rather than N video pipelines.
+ */
+export async function readOrMakePoster(filename: string) {
+  if (!/^[a-zA-Z0-9-]+\.[a-zA-Z0-9]+$/.test(filename)) return undefined;
+  const source = path.join(GENERATED_DIR, filename);
+  const poster = path.join(GENERATED_DIR, `${filename}.poster.jpg`);
+
+  try {
+    return await readFile(poster);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+
+  try {
+    await stat(source);
+  } catch {
+    return undefined;
+  }
+
+  try {
+    await run("ffmpeg", [
+      "-y", "-v", "error",
+      "-ss", "0.1",
+      "-i", source,
+      "-frames:v", "1",
+      "-vf", "scale=640:-2",
+      "-q:v", "4",
+      poster,
+    ]);
+    return await readFile(poster);
+  } catch {
+    // No ffmpeg, or a container it cannot open — the card falls back to its tile.
+    return undefined;
   }
 }
