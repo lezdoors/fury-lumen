@@ -1,136 +1,118 @@
-# Lumen — UI/UX improvement brief
+# Lumen — UI brief
 
-Paste this whole file as the opening message of a fresh session.
-
----
+Updated 2026-07-31, after the PANEL rebuild.
 
 ## What you're working on
 
 `~/lumen` — a pay-per-generation interface for AI image and video. One box:
-describe it, pick a model, generate. Results land in a grid below. **The price
-of a click is on the button before you click it.** That last point is the entire
-product thesis: Higgsfield hides cost behind credits, Lumen shows dollars.
+describe it, pick a model, generate. Results land in a ledger below. **The price
+of a click is on the button before you click it.** That is the entire product
+thesis: Higgsfield hides cost behind credits, Lumen shows dollars.
 
-Next 16 (Turbopack), React 19, Postgres on Neon, deployed to Vercel at
-`lmiere.com`. Run with `PORT=3210 pnpm dev`.
+Next 16 (Turbopack), React 19, Postgres on Neon, deployed to Vercel. Run with
+`PORT=3210 pnpm dev`.
 
-Your job is to make the interface and the experience materially better. Not to
-re-architect it, rename it, or restyle it from scratch.
+## Start here
 
-## Start here, before you write anything
+1. Read `REGISTER.md` — the locked visual register, PANEL, and the rules in it
+   that were bugs first.
+2. Read `UI-RESEARCH.md` — analysis of Krea, Runway, Frame.io, Midjourney,
+   Figma Weave. Its conclusions still hold; its "visual direction" section is
+   superseded by `REGISTER.md`.
+3. Run the app and use it. Pick `Proof mode · video` in the rate card and press
+   Run. It costs nothing and exercises the full loop.
 
-1. Read `STATE.md` — what is verified, what is assumed, what has never run.
-2. Read `UI-RESEARCH.md` — competitive analysis of Krea, Runway, Frame.io,
-   Midjourney, Figma Weave. Its conclusions still hold.
-3. Run the app and use it. Configure `Proof mode · video` in the model sheet and
-   generate something. It costs nothing and exercises the full loop.
-
-## Two environment traps that will waste an hour each
+## Two environment traps that will each waste an hour
 
 - **Reload once after starting the dev server.** Turbopack compiles CSS lazily;
-  a page loaded seconds after a cold start can reference a chunk still being
-  built. Safari caches that miss and renders the document unstyled *for its
-  lifetime*. The chunk 200s immediately afterwards, which makes the server look
-  innocent.
+  a page loaded seconds after a cold start can reference a chunk still building.
+  Safari caches that miss and renders the document unstyled *for its lifetime*.
+  The chunk 200s immediately after, which makes the server look innocent.
 - **`allowedDevOrigins` in `next.config.ts` must stay.** Without it the app
   server-renders perfectly at `127.0.0.1` and is completely dead to every click,
   with no error in the browser console. The warning is in the dev-server log.
 
-## The register is locked — do not re-open it
+## The register is locked — read REGISTER.md, don't re-open it
 
-**AgentFlow.** Charcoal top carrying an architectural grid with hatched cells →
-orange bloom through the middle → light frosted ask-box floating in it → the
-library on light ground below. Accent phrase in orange italic serif with a rule
-under it. Action is a lit sphere. Saturated orange, not amber.
+**PANEL.** A pale cool instrument chassis with true-dark wells cut into it, one
+lacquered vermilion for money / live / go, Martian Mono as the silkscreen voice.
+The quote is the largest object on screen. The rate card is printed on the panel
+rather than hidden behind a button. The RUN key arms above $1.
 
-This was chosen from four references after several rejected passes. Ryan's
-feedback that killed the earlier attempts: *"too generic and predictable"* and
-*"you are not using any of these ideas."* Do not drift back toward tasteful
-neutral. Do not introduce a second accent colour.
-
-Two structural rules that are not preferences — both were bugs first:
-
-- **`.page__sky` is a fixed-height block, not a percentage ramp.** Page
-  percentages put the light section thousands of pixels below where it's needed
-  once the grid is long, and the library ends up on orange with unreadable dark
-  type.
-- **`.results` owns its own light background** so it can never inherit the bloom.
-
-## Things that will silently break if you're not careful
-
-- **Every layout rule uses logical properties** (`inset-inline-start`,
-  `padding-inline`, `border-inline-start`). This is why Arabic RTL works from a
-  single `dir="rtl"` with no second stylesheet. Write `left`/`right` and you
-  break Arabic without noticing.
-- **Prompts use `unicode-bidi: plaintext`** so each takes direction from its own
-  content. Remove it and English prompts clip from the wrong edge in Arabic.
-- **Latin metadata is isolated `direction: ltr`** or model ids and prices reorder
-  around their own punctuation in RTL.
-- **The grid uses `<img>` with `?poster=1`, never `<video>`.** Safari will not
-  paint a frame from `<video preload="metadata">` however you seek it, so a grid
-  of video elements is blank tiles there. The poster endpoint renders a JPEG with
-  ffmpeg and caches it.
-- **`currentColor` does not work through `<img>`.** An SVG loaded that way is an
-  isolated document and falls back to black. Inline SVG, or ship explicit
-  light/dark files.
-- **Locale is read via `useSyncExternalStore`**, not set from an effect. Keeps
-  hydration clean while the server renders English and the client differs.
+The previous register (**AgentFlow** — charcoal grid, orange bloom, frosted
+glass ask-box, light library below) is retired. Do not reintroduce its gradient
+sky, its glass, or its amber.
 
 ## Do not reintroduce
 
-These were deliberately removed and are not oversights:
+Deliberately removed, not oversights:
 
-- Brand or workspace switchers (Maison Tanneurs / Izem) — Lumen is a general tool
-- A/B/C/D take letters — unreadable past three, and no comparable product does it
+- Brand or workspace switchers — Lumen is a general tool
+- A/B/C/D take letters — unreadable past three
 - Chat-first framing — `UI-RESEARCH.md` ruled it out explicitly
 - Credits, tokens, or any abstraction over the dollar price
-- Glassmorphism as decoration — glass is used once, on the ask-box, deliberately
+- Glassmorphism, gradients, glow, blur — there is none left in the build
+- A model sheet behind a button — the rate card is the panel
 
-## Where the actual UX gaps are
+## What landed in the PANEL pass
 
-Ranked by how much they cost the user:
+Against the old ranked gap list:
 
-1. **Reference image upload is disabled.** The `+` button is inert. Image-to-video
-   is the real workflow — a product still in, a video out. The models are already
-   in the catalogue (`.../image-to-video`) and the API accepts `referenceUrls`.
-   This is the single biggest missing capability.
-2. **No retry or vary.** A failed generation is a dead end; a good one can't be
-   re-rolled or nudged. Both are one-click operations in every comparable tool.
-3. **The model sheet doesn't help anyone choose.** It lists seven models with
-   prices from $0.045/s to $0.682/s — a 15× spread — and offers no basis for
-   picking. This is the most under-exploited surface in the app: making cost and
-   trade-off legible *is* the product's differentiator.
-4. **No spend guard.** Seedance at 1080p is ~$3.41 per 5s clip. Nothing warns,
-   confirms, or caps. A misclick is real money.
-5. **The running state says little.** Elapsed and queue position exist; there's
-   no sense of progress or expected duration.
-6. **The library doesn't scale.** No search, no filter by model or date, no way
-   to find the good one among hundreds.
-7. **Mobile is untested beyond "does not overflow."**
-8. **Keyboard is thin** — only `⌘↵` and `Esc`.
+1. **Reference upload is wired.** `POST /api/uploads` stores the frame; the
+   composer takes a click, a drop or a paste. Attaching one auto-switches to the
+   family's image-to-video model, and `RUN` is blocked with a reason if the
+   selected model cannot take a reference. Fal gets the bytes as a **data URI**
+   (`src/lib/assets.ts` `inlineLocalAsset`) because a `localhost` asset path is
+   unreachable from their side — handing fal a URL was never going to work here.
+2. **Retry and reuse.** Every tile carries `AGAIN` (re-run the recorded recipe
+   exactly) and `REUSE` (load prompt, model, ratio, duration and references back
+   into the composer). `REUSE` is in the viewer too.
+3. **The model sheet is gone.** Seven models, sorted cheapest first, printed on
+   the rail with proportional cost bars, a `REF` chip on the ones that take a
+   reference frame, and the availability reason under any that are off.
+4. **Spend guard.** Above `$1.00` the RUN key arms instead of firing. Arming is
+   stored as a signature of the recipe, so any edit disarms it; it expires after
+   six seconds.
+5. **The running state** carries the serial, elapsed clock, provider queue
+   position and a scanning indicator. **It shows no percentage and no ETA** —
+   nothing in the catalogue publishes a duration estimate, and a fabricated
+   number is worse than none.
+6. **The ledger scales** — free-text search across prompt, model and serial,
+   plus filters for video / image / kept / failed.
+7. **Mobile is verified**, not assumed. See below.
+8. **Keyboard**: `⌘↵` run, `/` focus the prompt, `Esc` close or disarm,
+   `←` / `→` step through the ledger inside the viewer.
 
-## How to verify — screenshots are not enough
+## Still open
 
-There's a puppeteer-core rig pattern used throughout this project. Launch
-headless Chrome against `localhost:3210`, drive real interactions, and assert on
-computed values — not on how a screenshot looks. Specifically:
+- **The ledger has no date filter or grouping.** Search covers prompt, model and
+  serial; there is no "last 7 days".
+- **No A/B compare.** `UI-RESEARCH.md` § Frame.io still describes what this
+  should be; nothing has been built.
+- **Provider error strings and availability reasons are English only** — they
+  come from the server and are not routed through the dictionary.
+- **No cancel path for a running job.** There is no provider-side cancel and no
+  UI for one, so a mistaken expensive run cannot be stopped.
+- **Safari has not been re-checked since the rebuild.** Chrome has been, at four
+  widths and four locales. Chrome and Safari have disagreed repeatedly on this
+  codebase and Chrome was the optimistic one every time.
 
-- Confirm React actually hydrated (`Object.keys(el).some(k => k.startsWith("__react"))`).
+## Verification — screenshots are not enough
+
+Drive real interactions with a puppeteer-core rig against `localhost:3210` and
+assert on computed values, not on how a screenshot looks:
+
+- Confirm React hydrated (`Object.keys(el).some(k => k.startsWith("__react"))`).
   A page can render perfectly and be entirely dead.
-- Check `document.documentElement.scrollWidth > clientWidth` for horizontal
-  overflow at **1920, 1512, 1024 and 430px**. Every pass so far has held this.
+- Check `scrollWidth > clientWidth` at **1920, 1512, 1024 and 430px**.
 - Verify in **all four locales**, including `dir="rtl"`.
-- Assert the primary action is in view and not below the fold.
-
-Chrome and Safari have disagreed repeatedly in this project, and Chrome was the
-optimistic one every time. If a change touches media or CSS delivery, check
-Safari too.
+- Assert the RUN key is in view, not below the fold.
 
 ## Ground rules
 
-- Typecheck, lint and production build must stay clean.
-- Don't touch `src/lib/providers/`, `catalog.ts`, or pricing — the catalogue was
-  verified against fal's live API and the numbers are real.
+- Typecheck, lint and production build stay clean.
+- `src/lib/catalog.ts` prices and model ids were verified against fal's live API.
+  Don't edit the numbers or the endpoints.
 - **Never fire a paid generation to test UI.** Proof mode renders real assets for
-  free and exercises the identical code path.
-- Commit in coherent pieces with messages that explain *why*, not what.
+  free through the identical code path.
+- Commit in coherent pieces, messages explaining *why*.
