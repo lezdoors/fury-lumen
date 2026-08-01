@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Lumen">
+  <g fill="currentColor">
+    <path d="M4 4 H24 V13 H13 V24 H4 Z"/>
+    <path d="M44 4 V24 H35 V13 H24 V4 Z" opacity=".55"/>
+    <path d="M44 44 H24 V35 H35 V24 H44 Z"/>
+    <path d="M4 44 V24 H13 V35 H24 V44 Z" opacity=".55"/>
+  </g>
+  <rect x="20" y="20" width="8" height="8" fill="#FF7A1A"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 62" role="img" aria-label="lumen">
+  <path d="M4 4 H22 V44 H60 V58 H4 Z" fill="#FF7A1A"/>
+  <path d="M28 38 V10 L40 28 L52 10 V38" fill="none" stroke="currentColor" stroke-width="9"
+        stroke-linecap="butt" stroke-linejoin="miter"/>
+</svg>
