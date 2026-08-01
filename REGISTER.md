@@ -1,128 +1,130 @@
-# Lumen — register: PANEL
+# Lumen — register: KILN
 
-Locked 2026-07-31. Replaces **AgentFlow** (charcoal grid → orange bloom → light
-library, frosted glass ask-box), which is retired and must not be reintroduced.
+Locked 2026-07-31. Replaces **PANEL** (pale instrument chassis, 1px bevels,
+radius 0), which Ryan rejected in one word: *Windows 98*. He was right — a light
+grey ground with a light-top/dark-bottom 1px edge is literally the Win95 button
+treatment, and zero radius plus grey segmented strips finished the job.
+
+Before PANEL there was **AgentFlow** (charcoal grid → orange bloom → frosted
+glass ask-box → light library). Both are retired.
 
 ## The argument
 
-Lumen's whole product thesis is one sentence: **the price of a click is on the
-button before you click it.** Higgsfield hides cost behind credits and covers
-the hiding with gloss — purple bloom, glass, cinematic reel, hype.
+Lumen's thesis is one sentence: **the price of a click is on the button before
+you click it.** Higgsfield hides cost behind credits and covers the hiding with
+gloss.
 
-A register that decorates is therefore working against the product. So Lumen is
-not styled as a website with a prompt box. It is built as **the front panel of a
-machine that turns dollars into footage.** The largest object on screen is not a
-headline or a hero video. It is the quote.
+So the console runs in a black room over a field of real incandescence — compute
+costs money because it costs heat — and **the price of the next click is the
+largest object on the screen.** Everything else is either glass or nothing.
 
-## Two materials, one signal
+## Materials
 
 | | |
 |---|---|
-| **Chassis** | `oklch(91.5% 0.004 240)` — a pale cool instrument panel. Labels are silkscreened onto it; rules are engraved into it. Nothing floats above it and nothing blurs. |
-| **Well** | `oklch(19% 0.007 250)` → `oklch(12% 0.006 250)` — a dark recess cut through the chassis. Anywhere the machine *shows* you something — media, the prompt, the price — the panel is cut away and you look into it. |
-| **Signal** | `oklch(56% 0.212 29)` — one lacquered vermilion, rationed. It means **money, live, or go**, and nothing else. Never a link, never a border, never emphasis. |
+| **Void** | `oklch(5% 0.003 40)`. The room. |
+| **Field** | A full-bleed photograph, or — once there is paid work — the operator's own last completed clip, playing muted on a loop, drifting slowly. Held under a scrim. Proof renders are never promoted to the field: they are diagnostics, not wallpaper. |
+| **Glass** | The only material for things you touch. A `::before` draws a light-catching edge, bright at top and bottom and gone through the middle, the way a real pane picks up a room. |
+| **Blend** | Display type in `mix-blend-mode: exclusion`. This is what lets the ground be arbitrary: the wordmark, the quote and the telemetry invert against whatever frame lands behind them. Give any of them a solid colour and the interface breaks the first time a bright frame plays. |
+| **Ember** | `oklch(64% 0.215 42)`. The one accent, and it is mostly *in the photograph*. In the interface it means live or go and nothing else. **Money is white** — over that field white is the brightest thing there is, and the money should be the brightest thing there is. |
 
-Failure is not a second accent. It is the signal drained of chroma and dropped
-in lightness (`--dead`), so a dead run reads as unlit rather than as alarm.
-
-**Depth is drawn with two 1px lines, never with a shadow.** Light on the upper
-edge and dark on the lower reads as raised; the inverse reads as cut. A single
-light source above is what makes a drawn panel read as a real one. There are no
-blurs, no glows and no glass anywhere in the build.
+Failure is the ember gone out (`--dead`), not a second hue.
 
 ## Type — 2 + 1
 
-- **Panel** · Martian Mono — wordmark, the quote figure, rates, serials. Wide
-  and engineered; it is the silkscreen voice. **Latin and numerals only** — it
-  is never used for translated copy, because it is wide and has no Arabic.
-- **UI** · Geist — every translated string, prompts, model names.
-- **Data** · Geist Mono — telemetry, ids, timestamps, elapsed clocks.
+- **Display** · Instrument Serif, roman — the wordmark and the Ledger head.
+  Never italic; an italicised display word is among the most reliable AI tells.
+- **UI** · Inter Tight — every translated string, prompts, model names.
+- **Figures** · Martian Mono — the quote, every rate, serials, telemetry.
+  Tabular, always: a price that reflows as it changes is not a readout.
 
-Radius is `0` everywhere except media tiles, which carry the `2px` a real cut
-leaves behind. A milled panel has no rounded corners.
+Radii are generous (10–24px) and there is not one bevel in the build.
 
 ## Structure
 
+One screen, one band. The field takes the top; the whole console sits along the
+bottom edge, so nothing that costs money is ever below the fold.
+
 ```
-┌── rail ──────────────┬── plate ─────────────────────────┐
-│ LUMEN                │  prompt well  ·  + ref  ·  RUN $ │
-│ QUOTE   $1.52        ├──────────────────────────────────┤
-│   rate × dur · scale │  IN PROGRESS  LMN-0043  00:12    │
-│ SPENT · RUNS · LIVE  ├──────────────────────────────────┤
-├──────────────────────┤  LEDGER  find · filters          │
-│ RATE CARD            │  ┌────┐ ┌────┐ ┌────┐            │
-│   7 models, sorted,  │  │    │ │    │ │    │            │
-│   with cost bars     │  └────┘ └────┘ └────┘            │
-│ ASPECT · DURATION    │  LMN-0043 $1.52                  │
-│ LANG · colophon      │                                  │
-└──────────────────────┴──────────────────────────────────┘
+┌────────────────────────────────────────────────────┐
+│ Lumen                    [spent runs live] [EN..]  │
+│                                                    │
+│                (the field, drifting)               │
+│                                                    │
+│  ┌──────────────┐   QUOTE                          │
+│  │ RATE CARD    │   $1.52                          │
+│  │ 7 rows, bars │   0.3034/s × 5s · 16:9           │
+│  ├──────────────┤   ├──────────────────────────┐   │
+│  │ ASPECT · DUR │   │ prompt · +ref · RUN $1.52│   │
+│  └──────────────┘   └──────────────────────────┘   │
+└────────────────────────────────────────────────────┘
+        ↓ scroll — the room goes solid
+   LEDGER · scatter grid, tiles at their own aspect
 ```
 
-Three named moves carry the register:
+Four named moves:
 
-1. **The gauge.** The live quote, set at display size in Martian Mono, with the
-   rate × duration breakdown beneath it and a **price-position scale** showing
-   where the chosen model sits in the catalogue's fifteen-fold spread. It is
-   sticky: it stays on screen while the ledger scrolls.
-2. **The rate card, printed on the panel.** Not a sheet you open. Seven models
-   from $0.045/s to $0.3034/s, sorted cheapest first, each with a proportional
-   cost bar and an availability note. A sheet you have to open hides exactly the
-   comparison the product exists to make.
-3. **The RUN key.** A physical key that sits 2px proud and travels that 2px when
-   pressed — the only element in the interface that moves. Above `$1.00` it
-   **arms** instead of firing, and the label changes to CONFIRM. Arming is
-   stored as a signature of the recipe, so editing anything disarms it, and it
-   expires after six seconds.
+1. **The quote.** `clamp(3rem, 6.2vw, 6.25rem)`, exclusion blend, tabular, with
+   the rate × duration line under it and a scale showing where this model sits
+   in the catalogue's fifteen-fold spread. It restrikes when the price changes.
+2. **The rate card, printed on the panel.** Seven models $0.045/s → $0.3034/s,
+   cheapest first, proportional bars, a `REF` chip on the ones that take a
+   reference frame. A sheet you have to open hides exactly the comparison the
+   product exists to make.
+3. **The lens.** The cursor burns a clear circle through the scrim so a frame
+   can be read at full strength without leaving the console. A CSS mask driven
+   by two custom properties and eased in a RAF loop — no state, no render per
+   frame, and no canvas re-encoded to a data URL. Off for coarse pointers and
+   for reduced motion.
+4. **The RUN key.** Above `$1.00` it arms rather than fires, lights ember, and
+   pulses. Arming is stored as a signature of the recipe, so any edit disarms
+   it; it expires after six seconds.
 
-Serials (`LMN-0043`) are assigned in creation order and never move — a stable
-handle for a result, which a UUID is not and a position in a grid is not either.
+Serials (`LMN-0043`) are assigned in creation order and never move.
 
 ## Ledger row
 
 | Site | Type stack | Ground | Layout grammar | Signature interaction | Imagery |
 |---|---|---|---|---|---|
-| **lumen** | Martian Mono (panel/figures, tabular) + Geist + Geist Mono | cool instrument chassis `oklch(91.5% .004 240)` with true-dark wells cut into it; one lacquered vermilion `oklch(56% .212 29)` for money/live/go only | **two-material panel** — sticky instrument rail (gauge + printed rate card) beside a work plate; radius 0, depth is a 1px light/dark edge pair, no shadow or blur anywhere, silkscreen caps labels always stacked above what they label | **the quote is the hero** — a display-size live figure with a price-position scale across the catalogue's spread, and a RUN key that arms above $1 | none — the operator's own generations are the only imagery in the interface |
+| **lumen** (product) | Instrument Serif (display, roman) + Inter Tight + Martian Mono (every figure, tabular) | true black `oklch(5% .003 40)` under a full-bleed incandescent field; one ember `oklch(64% .215 42)` for live/go only, money in white | **one bottom band over a full-bleed field** — rates left, quote + composer right, all glass with generous radii, zero bevels, display type in `mix-blend-mode: exclusion` so it survives any frame behind it | **the quote is the hero** — a 6vw live figure that restrikes on change, plus a cursor lens that burns through the scrim to read the field at full strength | the operator's own last paid generation, playing; a shipped incandescent field before there is one |
 
-Checked against `~/PORTFOLIO-REGISTERS.md`. Closest row is **akal-creator-v2**,
-which shares Martian Mono and a light-first radius-0 hairline vocabulary. It
-differs on ground (grey chassis + cut dark wells vs paper/night chapters +
-magenta beam), layout grammar (fixed application panel vs chaptered scroll
-dossier), signature interaction (live quote meter vs the filament) and imagery
-(none vs Machined Optics) — four of five axes clear.
+Checked against `~/PORTFOLIO-REGISTERS.md`; differs from every row on four of
+five axes.
 
 ## Not permitted
 
-- Gradient grounds, bloom, aurora, glow, glass, backdrop blur.
-- A second accent colour. Green for success, red for error — no. The signal is
-  the only chroma, and grey carries failure.
-- Rounded controls, pill buttons, soft cards, drop shadows.
-- Italic in any heading or label.
+- Bevels, 3D edges, raised/inset 1px pairs. That is what read as Windows 98.
+- A second accent. Green for success, red for error — no.
+- Italic headings.
 - Credits, tokens, or any abstraction over the dollar price.
-- Fabricated progress: no percentage bar and no ETA, because no provider in the
-  catalogue publishes a duration estimate. The running state shows elapsed time,
-  provider queue position when there is one, and a scanning indicator that does
-  not pretend to know how far along the work is.
+- Fabricated progress: no percentage and no ETA, because no provider in the
+  catalogue publishes a duration estimate. Elapsed time, provider queue position
+  and a scan that does not pretend to know how far along the work is.
+- Proof renders as the field.
 
 ## Rules that were bugs first
 
-- **Every layout rule uses logical properties** (`inset-inline-start`,
-  `padding-inline`, `border-block-end`). That is why Arabic mirrors from a single
-  `dir="rtl"` with no second stylesheet. Write `left`/`right` and Arabic breaks
-  invisibly.
-- **Prompts use `unicode-bidi: plaintext`** so each takes direction from its own
-  content.
-- **Latin metadata is isolated `direction: ltr`** — ids, prices and rates
-  reorder around their punctuation in RTL otherwise.
-- **Model names use `unicode-bidi: plaintext`, not `isolate`.** Left to inherit
-  RTL they truncate from the wrong end: `…g 2.5 Turbo Pro` instead of
-  `Kling 2.5 Turbo…`.
-- **The rail splits into `.rail__head` / `.plate` / `.rail__body` as three
-  explicit grid rows.** On a narrow viewport they reorder so the composer and
-  its RUN key stay above the fold. Left as one block, the rate card pushes the
-  only action off a phone screen.
+- **Nothing between the chrome and the stage may create a stacking context.**
+  A `z-index` on `.console` traps `mix-blend-mode: exclusion` against a
+  transparent backdrop and the display type silently stops inverting.
+- **The scrim has to reach near-black before the quote starts.** Exclusion blend
+  against a mid-grey ridge inverts to a muddy grey, which made the largest
+  number on the screen the least legible thing on it.
+- **The tile entrance fails open.** The hidden state is scoped to a class the
+  script adds only once it has an observer running. Failing open costs a frame;
+  failing closed loses the whole library.
+- **`/api/assets` must serve byte ranges.** Safari opens media with
+  `Range: bytes=0-1` and needs a `206`; a `200` with the whole file makes it give
+  up with `MEDIA_ERR_SRC_NOT_SUPPORTED` and never request another byte. Chrome
+  plays it regardless, which is how this survived a full verification pass.
 - **The grid uses `<img>` with `?poster=1`, never `<video>`.** Safari will not
   paint a frame from `<video preload="metadata">` however you seek it.
-- **`color-scheme` is `light`.** The chassis is pale; left on `dark`, native
-  scrollbars and search-field affordances render as dark chrome cut into it.
+- **Every layout rule uses logical properties.** Arabic mirrors from a single
+  `dir="rtl"` with no second stylesheet.
+- **Model names use `unicode-bidi: plaintext`, not `isolate`.** Left to inherit
+  RTL they truncate from the wrong end: `…g 2.5 Turbo Pro`.
+- **Prompts use `unicode-bidi: plaintext`; Latin metadata is isolated `ltr`.**
+- **Tile shape comes from the job's own aspect ratio.** A fixed crop turns a
+  9:16 vertical into a sliver — exactly the information an archive must keep.
 - **A tile's action row is a sibling of the media button, not a child** — a
   button cannot legally contain buttons.

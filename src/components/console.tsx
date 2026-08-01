@@ -36,6 +36,9 @@ const POLL_INTERVAL_MS = 2500;
 const CONFIRM_ABOVE_USD = 1;
 const ARM_TIMEOUT_MS = 6000;
 
+/** The room before there is any work to put in it. */
+const FIELD_STILL = "/stage/field.webp";
+
 /** Drawn to proportion in the format control — the shape is the label. */
 const RATIOS: { value: AspectRatio; w: number; h: number }[] = [
   { value: "16:9", w: 15, h: 8 },
@@ -120,7 +123,7 @@ function rateOf(model: ProviderModel) {
   return model.costPerSecondUsd ?? model.estimatedCostUsd;
 }
 
-export function Panel({
+export function Console({
   initialModels,
   initialJobs,
 }: {
@@ -162,6 +165,8 @@ export function Panel({
   const formRef = useRef<HTMLFormElement>(null);
   const promptRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   const selectedModel = models.find((model) => modelKeyOf(model) === modelKey);
   const allowedDurations = selectedModel?.durations;
@@ -196,6 +201,25 @@ export function Panel({
   const serials = useMemo(() => {
     const ordered = [...jobs].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     return new Map(ordered.map((job, index) => [job.id, `LMN-${String(index + 1).padStart(4, "0")}`]));
+  }, [jobs]);
+
+  /**
+   * The room behind the console. Once there is finished work it is the most
+   * recent clip, because an interface that wears what you made it is worth more
+   * than one that wears a stock gradient. Before that, a shipped field.
+   */
+  const field = useMemo(() => {
+    // Proof renders are diagnostics — a test pattern on black. They exercise the
+    // loop honestly and they are the wrong thing to hang on the wall, so only
+    // real generations are ever promoted to the field.
+    const latest = jobs.find(
+      (job) =>
+        job.status === "completed" &&
+        job.assetUrl &&
+        isVideo(job) &&
+        job.providerId !== "mock",
+    );
+    return { video: latest?.assetUrl, still: FIELD_STILL };
   }, [jobs]);
 
   const running = useMemo(
@@ -293,6 +317,82 @@ export function Panel({
     document.documentElement.lang = locale;
     document.documentElement.dir = dirOf(locale);
   }, [locale]);
+
+  /**
+   * The lens. The cursor burns a clear circle through the scrim so a frame can
+   * be read at full strength without leaving the console.
+   *
+   * Position is written straight to two custom properties on the stage — no
+   * state, so no render per frame — and eased, because an un-eased mask that
+   * snaps to the pointer reads as a bug rather than as an optic. Pointer-driven
+   * by definition, so it is off entirely for coarse pointers and for anyone who
+   * asked for reduced motion.
+   */
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const target = { x: 0, y: 0 };
+    const eased = { x: 0, y: 0 };
+    let primed = false;
+    let frame = 0;
+
+    function onMove(event: MouseEvent) {
+      target.x = event.clientX;
+      target.y = event.clientY;
+      if (!primed) {
+        // Snap on the first sighting, or the lens sweeps in from the origin.
+        eased.x = target.x;
+        eased.y = target.y;
+        primed = true;
+      }
+      stage!.classList.add("is-lit");
+    }
+    function onLeave() {
+      stage!.classList.remove("is-lit");
+    }
+    function tick() {
+      eased.x += (target.x - eased.x) * 0.14;
+      eased.y += (target.y - eased.y) * 0.14;
+      stage!.style.setProperty("--mx", `${eased.x}px`);
+      stage!.style.setProperty("--my", `${eased.y}px`);
+      frame = requestAnimationFrame(tick);
+    }
+
+    frame = requestAnimationFrame(tick);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    document.addEventListener("mouseleave", onLeave);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  // One orchestrated entrance as a tile arrives, then it is simply there — not
+  // a fade that replays every time the ledger scrolls past.
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Only hide the tiles once there is an observer that can bring them back.
+    sheet.classList.add("sheet--staged");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-in");
+            observer.unobserve(entry.target);
+          }
+        }
+      },
+      { rootMargin: "0px 0px -6% 0px", threshold: 0.04 },
+    );
+    for (const tile of sheet.querySelectorAll(".tile")) observer.observe(tile);
+    return () => observer.disconnect();
+  }, [visible]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -510,34 +610,106 @@ export function Panel({
   const runLabel = armed ? t.confirm : t.run;
 
   return (
-    <main className="panel">
-      {/* ------------------------------------------------------------ rail */}
-      <div className="rail__head">
-        <div className="mark">
-          <b>LUMEN</b>
-          <span>{t.consoleSub}</span>
-        </div>
+    <>
+      {/* ------------------------------------------------------------ stage */}
+      {/* The room. A shipped field until there is work, then the operator's own
+          last completed clip. The lens layer is the same picture undimmed; the
+          scrim between them is what the cursor burns through. */}
+      <div className="stage" ref={stageRef} aria-hidden="true">
+        {field.video ? (
+          <video
+            className="stage__frame"
+            src={field.video}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="stage__frame" src={field.still} alt="" fetchPriority="high" />
+        )}
+        <div className="stage__scrim" />
+        {field.video ? (
+          <video className="stage__lens" src={field.video} autoPlay muted loop playsInline preload="metadata" />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="stage__lens" src={field.still} alt="" />
+        )}
+      </div>
 
-        <div className="gauge">
-          <span className="silk" id="quote-label">{t.quote}</span>
-          <div className="gauge__well" aria-live="polite" aria-labelledby="quote-label">
-            <output className={`gauge__figure ${cost === 0 ? "gauge__figure--free" : ""}`}>
-              {money(cost)}
-            </output>
-            <div className="gauge__break">
-              {selectedModel?.costPerSecondUsd ? (
-                <span>
-                  <b>{rate(selectedModel.costPerSecondUsd)}</b>
-                  {t.perSecond} × {effectiveDuration}s
-                </span>
-              ) : (
-                <span>{cost === 0 ? t.free : t.flat}</span>
-              )}
-              <span>· {ratio}</span>
+      <main className="console">
+        {/* ---------------------------------------------------------- mast */}
+        <header className="mast">
+          <div className="wordmark blend">
+            Lumen
+            <small>{t.consoleSub}</small>
+          </div>
+          <div className="mast__right">
+            <div className="readout glass">
+              <span>
+                {t.spent}
+                <b>{money(spend)}</b>
+              </span>
+              <span>
+                {t.runs}
+                <b>{jobs.length}</b>
+              </span>
+              <span className={running.length ? "is-live" : undefined}>
+                {t.live}
+                <b>{running.length}</b>
+              </span>
             </div>
-            <p className="gauge__model">{selectedModel?.label ?? t.noModel}</p>
-            <div className="gauge__scale">
-              <div className="gauge__track">
+            <div className="langs glass" role="group" aria-label={t.language}>
+              {LOCALES.map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  className="lang"
+                  lang={code}
+                  title={LOCALE_NAMES[code]}
+                  aria-label={LOCALE_NAMES[code]}
+                  aria-pressed={locale === code}
+                  onClick={() => writeLocale(code)}
+                >
+                  {LOCALE_LABELS[code]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </header>
+
+        {/* --------------------------------------------------------- plate */}
+        <div className="plate">
+        {/* ---------------------------------------------------------- deck */}
+          {/* The price of the next click, and nothing else. */}
+          <section className="deck" aria-labelledby="quote-label">
+            <div className="quote">
+              <span className="silk" id="quote-label">{t.quote}</span>
+              <output
+                key={cost}
+                className="quote__figure blend"
+                aria-live="polite"
+              >
+                {money(cost)}
+              </output>
+              <p className="quote__line">
+                {selectedModel?.costPerSecondUsd ? (
+                  <span>
+                    {rate(selectedModel.costPerSecondUsd)}
+                    {t.perSecond} × {effectiveDuration}s
+                  </span>
+                ) : (
+                  <span>{cost === 0 ? t.free : t.flat}</span>
+                )}
+                <span>{ratio}</span>
+              </p>
+              <p className="quote__model">{selectedModel?.label ?? t.noModel}</p>
+            </div>
+
+            <div className="scale">
+              <div className="scale__track">
                 <i
                   aria-hidden="true"
                   style={{
@@ -545,397 +717,368 @@ export function Panel({
                   }}
                 />
               </div>
-              <div className="gauge__ends">
+              <div className="scale__ends">
                 <span>{rate(0)}</span>
-                <span>{rate(topRate)}{t.perSecond}</span>
+                <span>
+                  {rate(topRate)}
+                  {t.perSecond}
+                </span>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="session">
-          <div>
-            <span className="silk">{t.spent}</span>
-            <b>{money(spend)}</b>
-          </div>
-          <div>
-            <span className="silk">{t.runs}</span>
-            <b>{jobs.length}</b>
-          </div>
-          <div>
-            <span className="silk">{t.live}</span>
-            <b className={running.length ? "is-live" : undefined}>{running.length}</b>
-          </div>
-        </div>
-      </div>
-
-      <div className="rail__body">
-        <section className="rates" aria-labelledby="rates-label">
-          <div className="rates__head">
-            <span className="silk" id="rates-label">{t.rateCard}</span>
-            <span className="rates__unit">{t.rateUnit}</span>
-          </div>
-          <div className="rates__list">
-            {rateCard.map((model) => {
-              const perSecond = model.costPerSecondUsd;
-              const width = Math.max(2, (rateOf(model) / topRate) * 100);
-              return (
-                <button
-                  key={modelKeyOf(model)}
-                  type="button"
-                  className={`rate ${modelKey === modelKeyOf(model) ? "is-active" : ""}`}
-                  disabled={!model.available}
-                  aria-pressed={modelKey === modelKeyOf(model)}
-                  onClick={() => {
-                    setModelKey(modelKeyOf(model));
-                    setNotice("");
-                  }}
-                >
-                  {/* The REF marker leads the row: trailing it puts it inside the
-                      ellipsis, so the one thing that changes what a model can do
-                      is the first thing truncated away. */}
-                  <span className="rate__name">
-                    {acceptsReference(model) && (
-                      <span className="rate__ref">{t.takesReference}</span>
-                    )}
-                    {model.label}
-                  </span>
-                  <span className="rate__price">
-                    {perSecond ? rate(perSecond) : rateOf(model) === 0 ? "—" : money(rateOf(model))}
-                  </span>
-                  <span className="rate__bar" aria-hidden="true">
-                    <i style={{ ["--w" as string]: `${width}%` }} />
-                  </span>
-                  {model.availabilityReason && (
-                    <span className="rate__why">{model.availabilityReason}</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="controls" aria-labelledby="format-label">
-          <div className="control">
-            <span className="silk" id="format-label">{t.aspect}</span>
-            <div className="segments segments--grid" role="group" aria-labelledby="format-label">
-              {RATIOS.map((entry) => (
-                <button
-                  key={entry.value}
-                  type="button"
-                  className="segment"
-                  aria-pressed={ratio === entry.value}
-                  onClick={() => setRatio(entry.value)}
-                >
-                  <i
-                    aria-hidden="true"
-                    style={{
-                      ["--gw" as string]: `${entry.w}px`,
-                      ["--gh" as string]: `${entry.h}px`,
-                    }}
-                  />
-                  {entry.value}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {selectedModel?.mediaKind === "video" && (
-            <div className="control">
-              <span className="silk" id="duration-label">{t.duration}</span>
-              <div className="segments" role="group" aria-labelledby="duration-label">
-                {(allowedDurations ?? [5]).map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className="segment"
-                    aria-pressed={effectiveDuration === value}
-                    onClick={() => setDuration(value)}
-                  >
-                    {t.seconds(value)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
-        <div className="footing">
-          <span className="silk">{t.language}</span>
-          <div className="langs" role="group" aria-label={t.language}>
-            {LOCALES.map((code) => (
-              <button
-                key={code}
-                type="button"
-                className="lang"
-                lang={code}
-                title={LOCALE_NAMES[code]}
-                aria-label={LOCALE_NAMES[code]}
-                aria-pressed={locale === code}
-                onClick={() => writeLocale(code)}
-              >
-                {LOCALE_LABELS[code]}
-              </button>
-            ))}
-          </div>
-          <p className="colophon">{t.colophon}</p>
-        </div>
-      </div>
-
-      {/* ----------------------------------------------------------- plate */}
-      <div className="plate">
-        <section className="composer">
-          <form ref={formRef} onSubmit={run}>
-            <div
-              className={`composer__well ${isDropTarget ? "is-target" : ""}`}
-              onDragOver={(event) => {
-                event.preventDefault();
-                setIsDropTarget(true);
-              }}
-              onDragLeave={() => setIsDropTarget(false)}
-              onDrop={onDrop}
-            >
-              <label className="sr-only" htmlFor="prompt">{t.promptLabel}</label>
-              <textarea
-                id="prompt"
-                ref={promptRef}
-                value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
-                onPaste={onPaste}
-                placeholder={isDropTarget ? t.dropHere : t.promptPlaceholder}
-                rows={3}
-              />
-
-              {references.length > 0 && (
-                <div className="refs">
-                  {references.map((reference) => (
-                    <button
-                      key={reference.url}
-                      type="button"
-                      className="ref"
-                      title={reference.name}
-                      aria-label={`${t.removeRef} — ${reference.name}`}
-                      onClick={() => setReferences([])}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={reference.url} alt="" />
-                      <span aria-hidden="true">✕</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <div className="composer__foot">
-                <div className="composer__left">
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif"
-                    className="sr-only"
-                    onChange={(event) => {
-                      void attach(event.target.files);
-                      event.target.value = "";
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="attach"
-                    aria-label={t.attachAria}
-                    onClick={() => fileRef.current?.click()}
-                    disabled={isUploading}
-                  >
-                    <span aria-hidden="true">+</span> {isUploading ? t.uploading : t.attach}
-                  </button>
-                  <span className="hint">{t.shortcut}</span>
-                </div>
-                {/* The recipe, written out. The gauge says what it costs; this
-                    says what "it" is, so nothing about the charge is implicit. */}
-                <p className="recipe">
-                  {selectedModel ? shortModelId(selectedModel.id) : t.noModel}
-                  {selectedModel?.mediaKind === "video" ? ` · ${effectiveDuration}s` : ""} ·{" "}
-                  {ratio}
-                  {references.length > 0 ? ` · ${t.takesReference}` : ""}
-                </p>
-                <div className="composer__right">
-                  <button
-                    type="submit"
-                    className={`runkey ${armed ? "runkey--armed" : ""}`}
-                    disabled={!canRun}
-                    aria-label={t.runAria(money(cost))}
-                  >
-                    {runLabel} <b>{isSubmitting ? t.sending : money(cost)}</b>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </form>
-
-          {armed && <p className="fault" role="status">{t.armed(money(cost))}</p>}
-          {referenceBlocked && <p className="fault" role="status">{t.noReferenceModel}</p>}
-          {notice && !armed && <p className="hint" role="status">{notice}</p>}
-          {fault && <p className="fault" role="alert">{fault}</p>}
-        </section>
-
-        {running.length > 0 && (
-          <section className="live" aria-label={t.inProgress}>
-            <span className="silk">{t.inProgress}</span>
-            <ul>
-              {running.map((job) => (
-                <li key={job.id}>
-                  <span className="live__serial">{serials.get(job.id)}</span>
-                  <p>{job.prompt}</p>
-                  <span className="live__state">
-                    {job.queuePosition ? t.queuedAt(job.queuePosition) : t.generating}
-                  </span>
-                  <time>{elapsedOf(job)}</time>
-                  <span className="live__scan" aria-hidden="true"><i /></span>
-                </li>
-              ))}
-            </ul>
           </section>
-        )}
 
-        <section className="ledger" aria-labelledby="ledger-label">
-          <div className="ledger__head">
-            <div className="ledger__title">
-              <span className="silk" id="ledger-label">{t.ledger}</span>
-              <span className="ledger__count">{t.ledgerCount(jobs.length, money(spend))}</span>
-            </div>
-            <div className="ledger__tools">
-              <label className="sr-only" htmlFor="find">{t.find}</label>
-              <input
-                id="find"
-                className="find"
-                type="search"
-                value={query}
-                placeholder={t.find}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              <div className="segments" role="group" aria-label={t.ledger}>
-                {(
-                  [
-                    ["all", t.filterAll],
-                    ["video", t.filterVideo],
-                    ["image", t.filterImage],
-                    ["kept", t.filterKept],
-                    ["failed", t.filterFailed],
-                  ] as [Filter, string][]
-                ).map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className="segment"
-                    aria-pressed={filter === value}
-                    onClick={() => setFilter(value)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {jobs.length === 0 ? (
-            <p className="empty">{t.empty}</p>
-          ) : visible.length === 0 ? (
-            <p className="empty">
-              {t.emptyFiltered}{" "}
-              <button
-                type="button"
-                className="segment"
-                onClick={() => {
-                  setFilter("all");
-                  setQuery("");
+          <section className="composer">
+            <form ref={formRef} onSubmit={run}>
+              <div
+                className={`composer__well glass ${isDropTarget ? "is-target" : ""}`}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setIsDropTarget(true);
                 }}
+                onDragLeave={() => setIsDropTarget(false)}
+                onDrop={onDrop}
               >
-                {t.clearFilters}
-              </button>
-            </p>
-          ) : (
-            <div className="sheet">
-              {visible.map((job) => {
-                const model = refreshedModelFor(job);
-                return (
-                  <article key={job.id} className={`tile tile--${job.status}`}>
-                    <div className="tile__frame">
-                      <button
-                        type="button"
-                        className="tile__stage"
-                        disabled={!job.assetUrl}
-                        aria-label={job.prompt}
-                        onClick={() => job.assetUrl && setOpenId(job.id)}
-                      >
-                        {job.assetUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={posterFor(job)}
-                            alt=""
-                            loading="lazy"
-                            onError={(event) => {
-                              event.currentTarget.src = "/proof-sample.jpg";
-                            }}
-                          />
-                        ) : (
-                          <span className="tile__wait">
-                            {job.status === "failed" ? t.failedTag : t.waiting}
-                          </span>
-                        )}
-                      </button>
-                      {job.assetUrl && (
-                        <span className="tile__kind">
-                          {isVideo(job) ? t.videoTag : t.imageTag}
-                        </span>
-                      )}
-                      {job.reviewStatus === "approved" && (
-                        <span className="tile__kept" aria-label={t.kept} />
-                      )}
-                      <div className="tile__acts">
-                        <button
-                          type="button"
-                          className="act"
-                          disabled={!model?.available || isSubmitting}
-                          onClick={() => void again(job)}
-                        >
-                          {t.again}
-                        </button>
-                        <button type="button" className="act" onClick={() => reuse(job)}>
-                          {t.reuse}
-                        </button>
-                        <button
-                          type="button"
-                          className="act"
-                          onClick={() =>
-                            void review(
-                              job.id,
-                              job.reviewStatus === "approved" ? "unreviewed" : "approved",
-                            )
-                          }
-                        >
-                          {job.reviewStatus === "approved" ? t.kept : t.keep}
-                        </button>
-                      </div>
-                    </div>
+                <label className="sr-only" htmlFor="prompt">{t.promptLabel}</label>
+                <textarea
+                  id="prompt"
+                  ref={promptRef}
+                  value={prompt}
+                  onChange={(event) => setPrompt(event.target.value)}
+                  onPaste={onPaste}
+                  placeholder={isDropTarget ? t.dropHere : t.promptPlaceholder}
+                  rows={2}
+                />
 
-                    <div className="tile__caption">
-                      <span className="tile__line">
-                        <b>{serials.get(job.id)}</b>
-                        {money(job.actualCostUsd ?? job.estimatedCostUsd)}
-                      </span>
-                      <span className="tile__meta">
-                        {shortModelId(job.modelId)}
-                        {job.durationSeconds ? ` · ${job.durationSeconds}s` : ""} · {job.aspectRatio}
-                      </span>
-                      <p className="tile__prompt">{job.prompt}</p>
-                    </div>
-                  </article>
+                {references.length > 0 && (
+                  <div className="refs">
+                    {references.map((reference) => (
+                      <button
+                        key={reference.url}
+                        type="button"
+                        className="ref"
+                        title={reference.name}
+                        aria-label={`${t.removeRef} — ${reference.name}`}
+                        onClick={() => setReferences([])}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={reference.url} alt="" />
+                        <span aria-hidden="true">✕</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="composer__foot">
+                  <div className="composer__left">
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="sr-only"
+                      onChange={(event) => {
+                        void attach(event.target.files);
+                        event.target.value = "";
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="attach"
+                      aria-label={t.attachAria}
+                      onClick={() => fileRef.current?.click()}
+                      disabled={isUploading}
+                    >
+                      <span aria-hidden="true">+</span> {isUploading ? t.uploading : t.attach}
+                    </button>
+                    <span className="hint">{t.shortcut}</span>
+                  </div>
+                  {/* The recipe, written out. The quote says what it costs; this
+                      says what "it" is, so nothing about the charge is implicit. */}
+                  <p className="recipe">
+                    {selectedModel ? shortModelId(selectedModel.id) : t.noModel}
+                    {selectedModel?.mediaKind === "video" ? ` · ${effectiveDuration}s` : ""} ·{" "}
+                    {ratio}
+                    {references.length > 0 ? ` · ${t.takesReference}` : ""}
+                  </p>
+                  <div className="composer__right">
+                    <button
+                      type="submit"
+                      className={`runkey ${armed ? "runkey--armed" : ""}`}
+                      disabled={!canRun}
+                      aria-label={t.runAria(money(cost))}
+                    >
+                      {runLabel} <b>{isSubmitting ? t.sending : money(cost)}</b>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+
+            {armed && <p className="fault" role="status">{t.armed(money(cost))}</p>}
+            {referenceBlocked && <p className="fault" role="status">{t.noReferenceModel}</p>}
+            {notice && !armed && <p className="note" role="status">{notice}</p>}
+            {fault && <p className="fault" role="alert">{fault}</p>}
+          </section>
+
+          {running.length > 0 && (
+            <section className="live" aria-label={t.inProgress}>
+              <span className="silk">{t.inProgress}</span>
+              <ul>
+                {running.map((job) => (
+                  <li key={job.id} className="glass">
+                    <span className="live__serial">{serials.get(job.id)}</span>
+                    <p>{job.prompt}</p>
+                    <span className="live__state">
+                      {job.queuePosition ? t.queuedAt(job.queuePosition) : t.generating}
+                    </span>
+                    <time>{elapsedOf(job)}</time>
+                    <span className="live__scan" aria-hidden="true"><i /></span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+
+        {/* ---------------------------------------------------------- rail */}
+        <div className="rail">
+          <section className="rates glass" aria-labelledby="rates-label">
+            <div className="rates__head">
+              <span className="silk" id="rates-label">{t.rateCard}</span>
+              <span className="rates__unit">{t.rateUnit}</span>
+            </div>
+            <div className="rates__list">
+              {rateCard.map((model) => {
+                const perSecond = model.costPerSecondUsd;
+                const width = Math.max(2, (rateOf(model) / topRate) * 100);
+                return (
+                  <button
+                    key={modelKeyOf(model)}
+                    type="button"
+                    className={`rate ${modelKey === modelKeyOf(model) ? "is-active" : ""}`}
+                    disabled={!model.available}
+                    aria-pressed={modelKey === modelKeyOf(model)}
+                    onClick={() => {
+                      setModelKey(modelKeyOf(model));
+                      setNotice("");
+                    }}
+                  >
+                    {/* The REF marker leads the row: trailing it puts it inside
+                        the ellipsis, so the one thing that changes what a model
+                        can do is the first thing truncated away. */}
+                    <span className="rate__name">
+                      {acceptsReference(model) && (
+                        <span className="rate__ref">{t.takesReference}</span>
+                      )}
+                      {model.label}
+                    </span>
+                    <span className="rate__price">
+                      {perSecond ? rate(perSecond) : rateOf(model) === 0 ? "—" : money(rateOf(model))}
+                    </span>
+                    <span className="rate__bar" aria-hidden="true">
+                      <i style={{ ["--w" as string]: `${width}%` }} />
+                    </span>
+                    {model.availabilityReason && (
+                      <span className="rate__why">{model.availabilityReason}</span>
+                    )}
+                  </button>
                 );
               })}
             </div>
-          )}
-        </section>
-      </div>
+          </section>
 
-      {/* ---------------------------------------------------------- viewer */}
+          <section className="controls glass" aria-labelledby="format-label">
+            <div className="control">
+              <span className="silk" id="format-label">{t.aspect}</span>
+              <div className="segments segments--grid" role="group" aria-labelledby="format-label">
+                {RATIOS.map((entry) => (
+                  <button
+                    key={entry.value}
+                    type="button"
+                    className="segment"
+                    aria-pressed={ratio === entry.value}
+                    onClick={() => setRatio(entry.value)}
+                  >
+                    <i
+                      aria-hidden="true"
+                      style={{
+                        ["--gw" as string]: `${entry.w}px`,
+                        ["--gh" as string]: `${entry.h}px`,
+                      }}
+                    />
+                    {entry.value}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {selectedModel?.mediaKind === "video" && (
+              <div className="control">
+                <span className="silk" id="duration-label">{t.duration}</span>
+                <div className="segments" role="group" aria-labelledby="duration-label">
+                  {(allowedDurations ?? [5]).map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className="segment"
+                      aria-pressed={effectiveDuration === value}
+                      onClick={() => setDuration(value)}
+                    >
+                      {t.seconds(value)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      </main>
+
+      {/* -------------------------------------------------------- ledger */}
+      <section className="ledger" id="ledger" aria-labelledby="ledger-label">
+        <div className="ledger__head">
+          <div className="ledger__title">
+            <h2 id="ledger-label">{t.ledger}</h2>
+            <span className="ledger__count">{t.ledgerCount(jobs.length, money(spend))}</span>
+          </div>
+          <div className="ledger__tools">
+            <label className="sr-only" htmlFor="find">{t.find}</label>
+            <input
+              id="find"
+              className="find"
+              type="search"
+              value={query}
+              placeholder={t.find}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+            <div className="segments" role="group" aria-label={t.ledger}>
+              {(
+                [
+                  ["all", t.filterAll],
+                  ["video", t.filterVideo],
+                  ["image", t.filterImage],
+                  ["kept", t.filterKept],
+                  ["failed", t.filterFailed],
+                ] as [Filter, string][]
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className="segment"
+                  aria-pressed={filter === value}
+                  onClick={() => setFilter(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {jobs.length === 0 ? (
+          <p className="empty">{t.empty}</p>
+        ) : visible.length === 0 ? (
+          <p className="empty">
+            {t.emptyFiltered}{" "}
+            <button
+              type="button"
+              className="segment"
+              onClick={() => {
+                setFilter("all");
+                setQuery("");
+              }}
+            >
+              {t.clearFilters}
+            </button>
+          </p>
+        ) : (
+          <div className="sheet" ref={sheetRef}>
+            {visible.map((job) => {
+              const model = refreshedModelFor(job);
+              return (
+                <article key={job.id} className={`tile tile--${job.status}`}>
+                  <div
+                    className="tile__frame"
+                    style={{ ["--ar" as string]: job.aspectRatio.replace(":", " / ") }}
+                  >
+                    <button
+                      type="button"
+                      className="tile__stage"
+                      disabled={!job.assetUrl}
+                      aria-label={job.prompt}
+                      onClick={() => job.assetUrl && setOpenId(job.id)}
+                    >
+                      {job.assetUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={posterFor(job)}
+                          alt=""
+                          loading="lazy"
+                          onError={(event) => {
+                            event.currentTarget.src = "/proof-sample.jpg";
+                          }}
+                        />
+                      ) : (
+                        <span className="tile__wait">
+                          {job.status === "failed" ? t.failedTag : t.waiting}
+                        </span>
+                      )}
+                    </button>
+                    {job.assetUrl && (
+                      <span className="tile__kind">{isVideo(job) ? t.videoTag : t.imageTag}</span>
+                    )}
+                    {job.reviewStatus === "approved" && (
+                      <span className="tile__kept" aria-label={t.kept} />
+                    )}
+                    <div className="tile__acts">
+                      <button
+                        type="button"
+                        className="act"
+                        disabled={!model?.available || isSubmitting}
+                        onClick={() => void again(job)}
+                      >
+                        {t.again}
+                      </button>
+                      <button type="button" className="act" onClick={() => reuse(job)}>
+                        {t.reuse}
+                      </button>
+                      <button
+                        type="button"
+                        className="act"
+                        onClick={() =>
+                          void review(
+                            job.id,
+                            job.reviewStatus === "approved" ? "unreviewed" : "approved",
+                          )
+                        }
+                      >
+                        {job.reviewStatus === "approved" ? t.kept : t.keep}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="tile__caption">
+                    <span className="tile__line">
+                      <b>{serials.get(job.id)}</b>
+                      {money(job.actualCostUsd ?? job.estimatedCostUsd)}
+                    </span>
+                    <span className="tile__meta">
+                      {shortModelId(job.modelId)}
+                      {job.durationSeconds ? ` · ${job.durationSeconds}s` : ""} · {job.aspectRatio}
+                    </span>
+                    <p className="tile__prompt">{job.prompt}</p>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <footer className="footing">
+        <p className="colophon">{t.colophon}</p>
+      </footer>
+
+      {/* -------------------------------------------------------- viewer */}
       {opened?.assetUrl && (
         <div className="viewer" role="dialog" aria-modal="true" aria-label={opened.prompt}>
           <div className="viewer__stage" onMouseDown={() => setOpenId(null)}>
@@ -1008,6 +1151,6 @@ export function Panel({
           </div>
         </div>
       )}
-    </main>
+    </>
   );
 }

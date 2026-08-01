@@ -1,84 +1,77 @@
-/* Hallmark · genre: modern-minimal · macrostructure: bespoke "Panel"
- * theme: custom · vibe: "machine instrument, silkscreen, lacquered signal"
- * paper oklch(91.5% 0.004 240) · accent oklch(56% 0.212 29)
- * axes: light paper / mono display / warm accent
- * type: Martian Mono (panel) + Geist (ui) + Geist Mono (data)
- * pre-emit critique: P5 H5 E4 S5 R5 V5
+/* Hallmark · genre: atmospheric · macrostructure: bespoke "Kiln"
+ * theme: custom · vibe: "black room, incandescent field, the price is the light"
+ * paper oklch(5% 0.003 40) · accent oklch(64% 0.215 42)
+ * axes: dark paper / serif display / warm accent
+ * type: Instrument Serif (display) + Inter Tight (ui) + Martian Mono (figures)
+ * pre-emit critique: P5 H5 E4 S5 R4 V5
  */
 
 /* --------------------------------------------------------------------------
- * PANEL — Lumen's register.
+ * KILN — Lumen's register.
  *
- * The interface is the front of a machine that turns dollars into footage, so
- * it is built from exactly two materials and one signal colour.
+ * The console runs in a black room over a field of real incandescence. Compute
+ * costs money because it costs heat, so the ground is a photograph of heat and
+ * every surface above it is either glass or nothing at all.
  *
- *   CHASSIS  a pale cool panel. Labels are silkscreened onto it; rules are
- *            engraved into it. Nothing floats above it and nothing blurs.
- *   WELL     a dark recess cut through the chassis. Anywhere the machine shows
- *            you something — media, the prompt, the price — the panel is cut
- *            away and you look into it.
- *   SIGNAL   one lacquered vermilion, rationed. It means money, live, or go.
- *            It is never used for a link, a border, or emphasis.
- *
- * Depth is drawn with two 1px lines, never with a shadow: light on the upper
- * edge and dark on the lower edge reads as raised; the inverse reads as cut.
- * A single light source above is what makes a drawn panel read as a real one.
+ *   VOID     true black. The room.
+ *   FIELD    a full-bleed photograph, or — once there is work — the operator's
+ *            own last generation, playing. Held under a scrim so type survives.
+ *   GLASS    the only material. Used for surfaces you touch.
+ *   BLEND    display type in `mix-blend-mode: exclusion`, so the wordmark, the
+ *            quote and the telemetry stay legible over any frame that lands
+ *            behind them. This is what lets the ground be arbitrary.
+ *   EMBER    the one accent, and it is mostly *in the photograph*. In the
+ *            interface it means live or go, and nothing else. The money is
+ *            white, because white over that field is the brightest thing there
+ *            is and the money should be the brightest thing there is.
  * ------------------------------------------------------------------------- */
 
 :root {
-  /* -- chassis ------------------------------------------------------------ */
-  --chassis: oklch(91.5% 0.004 240);
-  --chassis-lit: oklch(95.5% 0.003 240);
-  --chassis-deep: oklch(87% 0.005 240);
-  --chassis-shelf: oklch(84% 0.006 240);
+  /* -- room --------------------------------------------------------------- */
+  --void: oklch(5% 0.003 40);
+  --void-2: oklch(8% 0.004 40);
+  --smoke: oklch(13% 0.006 40);
 
-  /* -- wells -------------------------------------------------------------- */
-  --well: oklch(19% 0.007 250);
-  --well-deep: oklch(12% 0.006 250);
-  --well-lip: oklch(31% 0.009 250);
-  --well-raised: oklch(25% 0.008 250);
-
-  /* -- engraving ---------------------------------------------------------- */
-  --engrave: oklch(74% 0.006 240);
-  --engrave-hard: oklch(60% 0.008 240);
-  --emboss: oklch(99% 0.002 240);
+  /* -- glass -------------------------------------------------------------- */
+  --glass-fill: oklch(100% 0 0 / 0.045);
+  --glass-fill-lit: oklch(100% 0 0 / 0.085);
+  --glass-edge: oklch(100% 0 0 / 0.14);
+  --glass-edge-lit: oklch(100% 0 0 / 0.42);
+  --glass-blur: blur(20px) saturate(150%);
 
   /* -- ink ---------------------------------------------------------------- */
-  --ink: oklch(21% 0.008 250);
-  --ink-2: oklch(44% 0.007 250);
-  --ink-3: oklch(58% 0.006 250);
-  --ink-inv: oklch(94% 0.004 250);
-  --ink-inv-2: oklch(70% 0.006 250);
-  --ink-inv-3: oklch(52% 0.007 250);
+  --ink: oklch(97% 0.004 60);
+  --ink-2: oklch(74% 0.005 60);
+  --ink-3: oklch(56% 0.006 60);
+  --ink-4: oklch(40% 0.006 60);
 
-  /* -- signal (the only accent) ------------------------------------------- */
-  --signal: oklch(56% 0.212 29);
-  --signal-lit: oklch(64% 0.200 33);
-  --signal-deep: oklch(42% 0.165 28);
-  --signal-ink: oklch(97% 0.018 40);
-  --signal-wash: oklch(56% 0.212 29 / 0.10);
+  /* -- ember (live / go, and nothing else) -------------------------------- */
+  --ember: oklch(64% 0.215 42);
+  --ember-hot: oklch(76% 0.185 58);
+  --ember-deep: oklch(44% 0.165 38);
+  --ember-ink: oklch(99% 0.010 60);
 
-  /* Failure is not a second accent — it is the signal drained of chroma and
-     dropped in lightness, so a dead run reads as unlit rather than as alarm. */
-  --dead: oklch(52% 0.020 250);
+  /* Failure is the ember gone out — no second hue enters the palette. */
+  --dead: oklch(48% 0.020 40);
 
   /* -- type --------------------------------------------------------------- */
-  /* Martian Mono is the silkscreen: wordmark, figures, serials, Latin rates.
-     It is never used for translated copy — it is wide, and it has no Arabic. */
-  --type-panel: "Martian Mono", ui-monospace, monospace;
-  --type-ui: "Geist", "SF Arabic", "Geeza Pro", ui-sans-serif, system-ui, sans-serif;
-  --type-data: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
+  --type-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --type-ui: "Inter Tight", "SF Arabic", "Geeza Pro", ui-sans-serif, system-ui, sans-serif;
+  /* Every figure in the interface. Tabular, engineered, and the only face that
+     ever carries money — a price that reflows as it changes is not a readout. */
+  --type-figure: "Martian Mono", ui-monospace, monospace;
 
-  --text-2xs: 0.625rem;
-  --text-xs: 0.6875rem;
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
   --text-base: 0.9375rem;
-  --text-md: 1.125rem;
-  --text-lg: 1.5rem;
-  --text-meter: clamp(2.25rem, 2.1vw + 1.5rem, 3.125rem);
+  --text-md: 1.0625rem;
+  --text-lg: 1.375rem;
+  --text-xl: clamp(1.75rem, 2vw + 1rem, 2.5rem);
+  /* The quote. Largest object on the screen, by a wide margin, on purpose. */
+  --text-quote: clamp(3.25rem, 7.5vw, 7rem);
 
-  --track-label: 0.14em;
-  --track-panel: 0.02em;
+  --track-label: 0.16em;
 
   /* -- space (4pt) -------------------------------------------------------- */
   --space-3xs: 0.125rem;
@@ -89,29 +82,30 @@
   --space-lg: 1.5rem;
   --space-xl: 2rem;
   --space-2xl: 3rem;
-  --space-3xl: 4.5rem;
+  --space-3xl: 5rem;
 
   /* -- geometry ----------------------------------------------------------- */
-  /* Hard edges. A milled panel has no rounded corners; only the media wells
-     carry the 2px a real cut leaves behind. */
   --hair: 1px;
-  --radius-well: 2px;
-  --rail-width: 21rem;
+  --radius-sm: 0.625rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-pill: 999px;
+  --rail-width: 21.5rem;
 
-  /* -- material ----------------------------------------------------------- */
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  --cut: inset 0 1px 0 oklch(0% 0 0 / 0.55), inset 0 -1px 0 var(--emboss);
-  --raised: inset 0 1px 0 var(--emboss), inset 0 -1px 0 oklch(0% 0 0 / 0.16);
+  /* -- the lens ----------------------------------------------------------- */
+  /* Radius of the cursor's clear circle through the scrim. */
+  --lens-r: 17rem;
 
   /* -- motion ------------------------------------------------------------- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur-micro: 90ms;
-  --dur-short: 180ms;
-  --dur-long: 320ms;
+  --dur-micro: 110ms;
+  --dur-short: 240ms;
+  --dur-long: 620ms;
 
   /* -- layers ------------------------------------------------------------- */
+  --z-stage: 0;
   --z-base: 1;
   --z-raised: 10;
   --z-sticky: 200;

@@ -1,8 +1,6 @@
-/* Minimal reset only. The interface lives in panel.css.
-   The chassis is light, so the form-control colour scheme must be too —
-   left on dark, native scrollbars and search-field affordances render as
-   dark chrome cut into a pale panel. */
-:root { color-scheme: light; }
+/* Minimal reset only. The interface lives in console.css.
+   The room is black, so native form affordances and scrollbars must be too. */
+:root { color-scheme: dark; }
 * { box-sizing: border-box; }
 html, body { min-height: 100%; }
 body { margin: 0; -webkit-font-smoothing: antialiased; }

@@ -1,0 +1,639 @@
+/* Hallmark · genre: atmospheric · macrostructure: bespoke "Kiln"
+ * theme: custom (see tokens.css) · nav: none — the wordmark plate is the nav
+ * enrichment: E — full-bleed field, the operator's own last generation once
+ * there is one · pre-emit critique: P5 H5 E4 S5 R4 V5
+ *
+ * The console runs in a black room over a field of real incandescence, and the
+ * price of the next click is the largest object in it.
+ *
+ * Three rules that hold the whole thing up:
+ *
+ *  - Display type sits in `mix-blend-mode: exclusion`. That is what lets the
+ *    ground be an arbitrary frame of the operator's own footage: the wordmark,
+ *    the quote and the telemetry invert against whatever lands behind them
+ *    instead of disappearing into it. Give any of them a solid colour and the
+ *    interface breaks the first time a bright frame plays.
+ *  - Every rule uses logical properties (`inset-inline-start`, `padding-inline`,
+ *    `border-block-end`). That is why Arabic mirrors from a single `dir="rtl"`
+ *    with no second stylesheet. Write `left`/`right` and Arabic breaks silently.
+ *  - The rail splits into `.deck` / `.plate` / `.rail` as three explicit grid
+ *    rows so a narrow viewport can reorder them and keep the composer and its
+ *    RUN key above the fold. As one block, the rate card pushes the only action
+ *    off a phone screen.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400&family=Inter+Tight:wght@300;400;500;600&family=Martian+Mono:wght@300;400;500;700&display=swap");
+@import url("./tokens.css");
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+body { margin: 0; background: var(--void); }
+button, textarea, select, input { font: inherit; color: inherit; }
+button { white-space: nowrap; }
+::selection { background: var(--ink); color: var(--void); }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ stage -- */
+/* The field. A shipped photograph until there is work, then the operator's own
+   last completed generation, playing muted on a loop. */
+
+.stage {
+  position: fixed; inset: 0; z-index: var(--z-stage);
+  overflow: hidden; pointer-events: none; background: var(--void);
+}
+.stage__frame,
+.stage__lens {
+  position: absolute; inset: 0;
+  inline-size: 100%; block-size: 100%;
+  object-fit: cover; display: block;
+}
+/* Slow drift so a still field is never quite static, and a played one is never
+   the only thing moving. */
+.stage__frame { animation: drift 44s var(--ease-in-out) infinite alternate; }
+@keyframes drift {
+  from { transform: scale(1.06) translate3d(0, 0, 0); }
+  to   { transform: scale(1.14) translate3d(-1.5%, -1%, 0); }
+}
+
+/* The scrim is what makes type survive the field. It is heaviest at the edges,
+   where the chrome lives, and lightest through the middle, where the picture
+   should still read as a picture. */
+.stage__scrim {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 38%, oklch(5% 0.003 40 / 0.26) 0%, oklch(5% 0.003 40 / 0.70) 56%, oklch(5% 0.003 40 / 0.94) 100%),
+    /* The lower half carries the quote and the composer, and the quote is set in
+       exclusion blend — against a mid-grey ridge that inverts to a muddy grey
+       rather than to white. The band has to reach near-black before the type
+       starts, or the largest number on the screen is the least legible thing. */
+    linear-gradient(to bottom,
+      oklch(5% 0.003 40 / 0.70) 0%, transparent 22%, transparent 42%,
+      oklch(5% 0.003 40 / 0.55) 62%, oklch(5% 0.003 40 / 0.88) 80%, oklch(5% 0.003 40 / 0.96) 100%);
+}
+
+/* The lens: the cursor burns a clear hole through the scrim so a frame can be
+   inspected at full strength without leaving the console. It is a copy of the
+   field masked by a radial gradient — a CSS mask driven by two custom
+   properties, not a canvas re-encoded to a data URL every frame. */
+.stage__lens {
+  opacity: 0;
+  transition: opacity var(--dur-long) var(--ease-out);
+  -webkit-mask-image: radial-gradient(circle var(--lens-r) at var(--mx, -50%) var(--my, -50%),
+    oklch(0% 0 0) 0%, oklch(0% 0 0) 34%, oklch(0% 0 0 / 0.55) 62%, oklch(0% 0 0 / 0.16) 84%, transparent 100%);
+  mask-image: radial-gradient(circle var(--lens-r) at var(--mx, -50%) var(--my, -50%),
+    oklch(0% 0 0) 0%, oklch(0% 0 0) 34%, oklch(0% 0 0 / 0.55) 62%, oklch(0% 0 0 / 0.16) 84%, transparent 100%);
+}
+.stage.is-lit .stage__lens { opacity: 1; }
+
+/* --------------------------------------------------------------- surfaces -- */
+
+/* Display type that must survive any frame behind it. */
+.blend {
+  mix-blend-mode: exclusion;
+  color: oklch(100% 0 0);
+}
+
+/* The one material for things you touch. The ::before draws a light-catching
+   edge — bright at top and bottom, gone through the middle — the way a real
+   bevelled pane picks up a room. */
+.glass {
+  position: relative;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.glass::before {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  border-radius: inherit; padding: var(--hair); pointer-events: none;
+  background: linear-gradient(180deg,
+    var(--glass-edge-lit) 0%, var(--glass-edge) 22%,
+    oklch(100% 0 0 / 0) 46%, oklch(100% 0 0 / 0) 58%,
+    var(--glass-edge) 80%, var(--glass-edge-lit) 100%);
+  -webkit-mask: linear-gradient(oklch(0% 0 0) 0 0) content-box, linear-gradient(oklch(0% 0 0) 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(oklch(0% 0 0) 0 0) content-box, linear-gradient(oklch(0% 0 0) 0 0);
+  mask-composite: exclude;
+}
+.glass > * { position: relative; z-index: 2; }
+
+/* Silkscreened control label. Always above what it labels, never beside it. */
+.silk {
+  display: block; font-family: var(--type-ui);
+  font-size: var(--text-2xs); font-weight: 500;
+  letter-spacing: var(--track-label); text-transform: uppercase;
+  color: var(--ink-3); text-align: start;
+}
+
+/* ------------------------------------------------------------------ shell -- */
+
+.console {
+  /* No z-index here on purpose. A stacking context between the chrome and the
+     stage would trap `mix-blend-mode: exclusion` against a transparent backdrop
+     and the display type would stop inverting over bright frames. DOM order is
+     what puts the console above the fixed stage. */
+  position: relative;
+  /* One screen, one band. The field takes the top; the whole console — rates,
+     quote, composer — sits along the bottom edge, so nothing that costs money
+     is ever below the fold. */
+  display: grid;
+  grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: clamp(var(--space-md), 2vw, var(--space-xl));
+  min-height: 100dvh;
+  padding: 0 clamp(var(--space-md), 2.5vw, var(--space-xl)) clamp(var(--space-lg), 3vh, var(--space-xl));
+  font-family: var(--type-ui); font-size: var(--text-base);
+  color: var(--ink);
+  letter-spacing: -0.011em;
+}
+.rail  { grid-column: 1; grid-row: 2; }
+.plate { grid-column: 2; grid-row: 2; min-width: 0; display: grid; gap: var(--space-md); align-content: end; }
+
+/* ------------------------------------------------------------------- mast -- */
+
+.mast {
+  grid-column: 1 / -1; grid-row: 0;
+  position: absolute; inset-block-start: 0; inset-inline: 0; z-index: var(--z-raised);
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-lg) clamp(var(--space-md), 2.5vw, var(--space-xl));
+  pointer-events: none;
+}
+.mast > * { pointer-events: auto; }
+.wordmark {
+  font-family: var(--type-display); font-weight: 400;
+  font-size: var(--text-xl); line-height: 1; letter-spacing: -0.02em;
+  direction: ltr; unicode-bidi: isolate;
+}
+.wordmark small {
+  display: block; margin-block-start: var(--space-2xs);
+  font-family: var(--type-ui); font-size: var(--text-2xs); font-weight: 500;
+  letter-spacing: var(--track-label); text-transform: uppercase;
+}
+.mast__right { display: flex; align-items: center; gap: var(--space-xs); }
+
+.readout {
+  display: flex; align-items: center; gap: var(--space-md);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  font-family: var(--type-figure); font-size: var(--text-2xs);
+  letter-spacing: 0.04em; text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  direction: ltr; unicode-bidi: isolate;
+}
+.readout span { color: var(--ink-3); }
+.readout b { font-weight: 500; color: var(--ink); margin-inline-start: var(--space-2xs); }
+.readout .is-live { color: var(--ember-hot); }
+.readout .is-live::before {
+  content: ""; display: inline-block;
+  inline-size: 0.4rem; block-size: 0.4rem; border-radius: 50%;
+  margin-inline-end: var(--space-2xs); background: var(--ember);
+  animation: pulse 1.8s var(--ease-in-out) infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+.langs { display: flex; gap: 2px; padding: 3px; border-radius: var(--radius-pill); }
+.lang {
+  min-inline-size: 2.25rem; min-block-size: 1.75rem;
+  border: 0; border-radius: var(--radius-pill); background: transparent;
+  font-family: var(--type-figure); font-size: var(--text-2xs); color: var(--ink-3);
+  letter-spacing: 0.06em; cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.lang[aria-pressed="true"] { background: var(--glass-fill-lit); color: var(--ink); }
+
+/* ------------------------------------------------------------------ quote -- */
+/* The price of the next click. Nothing else on the screen is allowed near it. */
+
+.deck { display: grid; gap: var(--space-sm); }
+.quote { display: grid; gap: var(--space-xs); }
+.quote__figure {
+  font-family: var(--type-figure); font-weight: 500;
+  font-size: var(--text-quote); line-height: 0.86;
+  letter-spacing: -0.07em; font-variant-numeric: tabular-nums;
+  direction: ltr; unicode-bidi: isolate;
+}
+/* A changed price should be felt, not just read. */
+.quote__figure { animation: strike var(--dur-short) var(--ease-out); }
+@keyframes strike { from { opacity: 0.35; transform: translateY(0.06em); } to { opacity: 1; transform: none; } }
+
+.quote__line {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-sm);
+  font-family: var(--type-figure); font-size: var(--text-2xs);
+  color: var(--ink-2); font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em; direction: ltr; unicode-bidi: isolate;
+}
+.quote__model {
+  margin: 0; font-size: var(--text-sm); color: var(--ink-2);
+  unicode-bidi: plaintext; text-align: start;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Where this model sits in the catalogue's fifteen-fold spread. The comparison
+   is the product; a bare figure hides it. */
+.scale { display: grid; gap: var(--space-2xs); max-inline-size: 22rem; }
+.scale__track { block-size: 2px; background: oklch(100% 0 0 / 0.16); }
+.scale__track i {
+  display: block; block-size: 100%; inline-size: var(--at, 0%); min-inline-size: 3px;
+  background: var(--ember);
+  transition: inline-size var(--dur-short) var(--ease-out);
+}
+.scale__ends {
+  display: flex; justify-content: space-between; gap: var(--space-xs);
+  font-family: var(--type-figure); font-size: var(--text-2xs); color: var(--ink-4);
+  font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate;
+}
+
+/* -------------------------------------------------------------- rate card -- */
+/* Seven models spanning fifteen times in price. A sheet you have to open hides
+   exactly the comparison the product exists to make, so the rates are on the
+   panel, sorted, with a bar for the order of magnitude. */
+
+.rail { display: grid; gap: var(--space-sm); align-content: end; }
+.rates { padding: var(--space-md); display: grid; gap: var(--space-xs); }
+.rates__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-sm); padding-inline: var(--space-2xs); }
+.rates__unit {
+  font-family: var(--type-figure); font-size: var(--text-2xs); color: var(--ink-4);
+  letter-spacing: 0.04em; text-transform: uppercase; direction: ltr; unicode-bidi: isolate;
+}
+.rates__list { display: grid; gap: 2px; }
+
+.rate {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto;
+  gap: var(--space-2xs) var(--space-sm); align-items: center;
+  inline-size: 100%; padding: var(--space-xs) var(--space-sm);
+  border: 0; border-radius: var(--radius-sm); background: transparent;
+  text-align: start; cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+.rate__name {
+  font-size: var(--text-sm); font-weight: 400; min-width: 0; color: var(--ink-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  /* Model names are Latin and stay Latin. Left to inherit RTL they truncate
+     from the wrong end — "…g 2.5 Turbo Pro" instead of "Kling 2.5 Turbo…". */
+  unicode-bidi: plaintext; text-align: start;
+}
+.rate__price {
+  font-family: var(--type-figure); font-size: var(--text-2xs); font-weight: 500;
+  color: var(--ink-2); font-variant-numeric: tabular-nums; letter-spacing: -0.03em;
+  direction: ltr; unicode-bidi: isolate;
+}
+.rate__bar { grid-column: 1 / -1; block-size: 2px; background: oklch(100% 0 0 / 0.10); }
+.rate__bar i {
+  display: block; block-size: 100%; inline-size: var(--w, 0%); min-inline-size: 2px;
+  background: oklch(100% 0 0 / 0.30);
+  transition: background-color var(--dur-short) var(--ease-out);
+}
+.rate__why {
+  grid-column: 1 / -1; font-size: var(--text-2xs); color: var(--ink-4);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* The one thing that changes what a model can do leads the row — trailing it
+   puts it inside the ellipsis. */
+.rate__ref {
+  display: inline-block; margin-inline-end: var(--space-2xs);
+  padding-inline: 4px; border-radius: 3px;
+  background: var(--ember); color: var(--ember-ink);
+  font-family: var(--type-figure); font-size: 0.5625rem; letter-spacing: 0.08em;
+  direction: ltr; unicode-bidi: isolate;
+}
+.rate.is-active { background: var(--glass-fill-lit); }
+.rate.is-active .rate__name { color: var(--ink); font-weight: 500; }
+.rate.is-active .rate__price { color: var(--ink); }
+.rate.is-active .rate__bar i { background: var(--ember); }
+.rate:disabled { cursor: not-allowed; opacity: 0.45; }
+.rate:disabled .rate__name { text-decoration: line-through; }
+
+/* --------------------------------------------------------------- controls -- */
+
+.controls { padding: var(--space-md); display: grid; gap: var(--space-md); }
+.control { display: grid; gap: var(--space-xs); }
+.segments { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+.segments--grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.segment {
+  min-block-size: 2.125rem; padding-inline: var(--space-sm);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2xs);
+  border: var(--hair) solid var(--glass-edge); border-radius: var(--radius-pill);
+  background: transparent; color: var(--ink-3);
+  font-family: var(--type-figure); font-size: var(--text-2xs); letter-spacing: 0.02em;
+  cursor: pointer; direction: ltr; unicode-bidi: isolate;
+  transition: background-color var(--dur-micro) var(--ease-out),
+              color var(--dur-micro) var(--ease-out),
+              border-color var(--dur-micro) var(--ease-out);
+}
+.segment i { display: block; inline-size: var(--gw); block-size: var(--gh); border: var(--hair) solid currentColor; opacity: 0.6; }
+.segment[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--void); }
+.segment[aria-pressed="true"] i { opacity: 0.85; }
+.segment:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* --------------------------------------------------------------- composer -- */
+
+.composer { display: grid; gap: var(--space-xs); }
+/* Deeper than the generic pane: this is the one surface carrying body text a
+   person has to read while writing, and a bright frame drifting behind a 4%
+   fill takes the prompt with it. */
+.composer__well {
+  padding: var(--space-md); display: grid; gap: var(--space-sm);
+  border-radius: var(--radius-lg); background: oklch(7% 0.004 40 / 0.66);
+}
+.composer__well.is-target { background: var(--glass-fill-lit); }
+.composer__well.is-target::before { background: linear-gradient(180deg, var(--ember) 0%, var(--ember-deep) 100%); }
+.composer textarea {
+  display: block; inline-size: 100%; min-block-size: 3.5rem; resize: vertical;
+  border: 0; outline: 0; background: transparent; color: var(--ink);
+  font-family: var(--type-ui); font-size: var(--text-md); line-height: 1.45;
+  letter-spacing: -0.012em; unicode-bidi: plaintext;
+}
+.composer textarea::placeholder { color: var(--ink-4); }
+
+.refs { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.ref {
+  position: relative; inline-size: 3rem; block-size: 3rem; padding: 0;
+  border: var(--hair) solid var(--glass-edge); border-radius: var(--radius-sm);
+  background: var(--void-2); cursor: pointer; overflow: hidden;
+}
+.ref img { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
+.ref span {
+  position: absolute; inset-block-start: 0; inset-inline-end: 0;
+  inline-size: 1.125rem; block-size: 1.125rem; display: grid; place-items: center;
+  background: oklch(0% 0 0 / 0.7); color: var(--ink); font-size: 0.625rem; line-height: 1;
+}
+
+.composer__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-sm); flex-wrap: wrap;
+}
+.composer__left, .composer__right { display: flex; align-items: center; gap: var(--space-sm); min-width: 0; }
+.attach {
+  min-block-size: 2.125rem; padding-inline: var(--space-md);
+  display: inline-flex; align-items: center; gap: var(--space-2xs);
+  border: var(--hair) solid var(--glass-edge); border-radius: var(--radius-pill);
+  background: transparent; color: var(--ink-2); font-size: var(--text-xs); cursor: pointer;
+  transition: color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.hint {
+  font-family: var(--type-figure); font-size: var(--text-2xs); color: var(--ink-4);
+  direction: ltr; unicode-bidi: isolate;
+}
+.recipe {
+  flex: 1 1 10rem; margin: 0; min-width: 0; text-align: center;
+  font-family: var(--type-figure); font-size: var(--text-2xs);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-4);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  direction: ltr; unicode-bidi: isolate;
+}
+.fault { margin: 0; font-size: var(--text-xs); color: var(--ember-hot); unicode-bidi: plaintext; }
+.note { margin: 0; font-size: var(--text-xs); color: var(--ink-3); unicode-bidi: plaintext; }
+
+/* ---------------------------------------------------------------- run key -- */
+
+.runkey {
+  display: inline-flex; align-items: center; gap: var(--space-sm);
+  min-block-size: 3rem; padding-inline: var(--space-xl);
+  border: 0; border-radius: var(--radius-pill);
+  background: var(--ink); color: var(--void);
+  font-family: var(--type-figure); font-weight: 500; font-size: var(--text-2xs);
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+  transition: transform var(--dur-micro) var(--ease-out),
+              background-color var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out);
+}
+.runkey b { font-weight: 500; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+.runkey:active { transform: scale(0.975); }
+.runkey:disabled {
+  background: transparent; color: var(--ink-4);
+  box-shadow: inset 0 0 0 var(--hair) var(--glass-edge); cursor: not-allowed;
+}
+/* Armed: an expensive run is confirmed on the key itself rather than behind a
+   dialog thrown over the work. It lights, because it is about to cost money. */
+.runkey--armed {
+  background: var(--ember); color: var(--ember-ink);
+  box-shadow: 0 0 0 6px oklch(64% 0.215 42 / 0.18);
+  animation: arm 1.4s var(--ease-in-out) infinite;
+}
+@keyframes arm {
+  0%, 100% { box-shadow: 0 0 0 6px oklch(64% 0.215 42 / 0.18); }
+  50%      { box-shadow: 0 0 0 12px oklch(64% 0.215 42 / 0.05); }
+}
+
+/* ------------------------------------------------------------------- live -- */
+
+.live { display: grid; gap: var(--space-xs); }
+.live ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2xs); }
+.live li {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: var(--space-sm); align-items: center;
+  padding: var(--space-sm) var(--space-md); border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+.live__serial {
+  font-family: var(--type-figure); font-size: var(--text-2xs); font-weight: 500;
+  color: var(--ember-hot); letter-spacing: 0.02em; direction: ltr; unicode-bidi: isolate;
+}
+.live li p { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; unicode-bidi: plaintext; text-align: start; color: var(--ink-2); }
+.live__state { font-size: var(--text-xs); color: var(--ink-3); text-align: start; }
+.live time { font-family: var(--type-figure); font-size: var(--text-xs); font-variant-numeric: tabular-nums; color: var(--ink-2); direction: ltr; unicode-bidi: isolate; }
+/* Honest progress: no provider in the catalogue publishes a duration estimate,
+   so this scans rather than fills. A percentage would be a fabricated number. */
+.live__scan { grid-column: 1 / -1; block-size: 2px; background: oklch(100% 0 0 / 0.10); overflow: hidden; }
+.live__scan i { display: block; block-size: 100%; inline-size: 26%; background: var(--ember); animation: scan 1.6s var(--ease-in-out) infinite alternate; }
+@keyframes scan { from { transform: translateX(-20%); } to { transform: translateX(400%); } }
+
+/* ----------------------------------------------------------------- ledger -- */
+/* Below the field: the room goes solid so the work is the only thing lit. */
+
+.ledger {
+  position: relative;
+  background: var(--void);
+  padding: var(--space-2xl) clamp(var(--space-md), 2.5vw, var(--space-xl)) var(--space-3xl);
+  border-block-start: var(--hair) solid oklch(100% 0 0 / 0.08);
+}
+.ledger__head { display: grid; gap: var(--space-md); margin-block-end: var(--space-xl); }
+.ledger__title { display: flex; align-items: baseline; gap: var(--space-md); flex-wrap: wrap; }
+.ledger__title h2 {
+  margin: 0; font-family: var(--type-display); font-weight: 400;
+  font-size: var(--text-xl); line-height: 1; letter-spacing: -0.02em; color: var(--ink);
+}
+.ledger__count {
+  font-family: var(--type-figure); font-size: var(--text-2xs); color: var(--ink-4);
+  font-variant-numeric: tabular-nums; letter-spacing: 0.04em;
+  direction: ltr; unicode-bidi: isolate;
+}
+.ledger__tools { display: flex; align-items: center; gap: var(--space-xs); flex-wrap: wrap; }
+.find {
+  min-block-size: 2.125rem; inline-size: min(100%, 15rem); padding-inline: var(--space-md);
+  border: var(--hair) solid var(--glass-edge); border-radius: var(--radius-pill);
+  background: transparent; color: var(--ink); font-size: var(--text-sm); outline: 0;
+  unicode-bidi: plaintext;
+}
+.find::placeholder { color: var(--ink-4); }
+.empty { max-inline-size: 46ch; color: var(--ink-3); font-size: var(--text-sm); line-height: 1.6; text-align: start; }
+
+/* A scatter, not a contact sheet: every third tile takes two columns, so the
+   grid reads as an archive rather than a spreadsheet of thumbnails. */
+.sheet { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(var(--space-md), 2vw, var(--space-xl)); }
+.tile { display: grid; gap: var(--space-sm); min-width: 0; }
+.tile:nth-child(6n + 1) { grid-column: span 2; }
+
+/* The frame owns the clip; the stage button and the action row are siblings
+   inside it, because a button cannot legally contain buttons. */
+.tile__frame {
+  /* The frame takes the shape the job was actually generated at. A fixed crop
+     turns a 9:16 vertical into a letterboxed sliver and a 16:9 into a pillar,
+     which is exactly the information an archive of shots needs to keep. */
+  position: relative; aspect-ratio: var(--ar, 4 / 5); overflow: hidden;
+  border-radius: var(--radius-md); background: var(--void-2);
+  box-shadow: inset 0 0 0 var(--hair) oklch(100% 0 0 / 0.08);
+}
+.tile__stage { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.tile__stage img {
+  position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover;
+  transition: transform var(--dur-long) var(--ease-out), opacity var(--dur-short) var(--ease-out);
+}
+.tile__stage:disabled { cursor: default; }
+.tile__wait { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--type-figure); font-size: var(--text-2xs); color: var(--ink-4); letter-spacing: 0.08em; text-transform: uppercase; }
+.tile--failed .tile__wait { color: var(--dead); }
+.tile__kind {
+  position: absolute; inset-block-end: var(--space-xs); inset-inline-start: var(--space-xs);
+  padding: 2px 7px; border-radius: var(--radius-pill);
+  background: oklch(0% 0 0 / 0.55); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  color: var(--ink); font-family: var(--type-figure); font-size: 0.5625rem; letter-spacing: 0.1em;
+}
+.tile__kept { position: absolute; inset-block-start: var(--space-xs); inset-inline-end: var(--space-xs); inline-size: 0.5rem; block-size: 0.5rem; border-radius: 50%; background: var(--ember); }
+
+.tile__acts {
+  position: absolute; inset-block-end: 0; inset-inline: 0; z-index: var(--z-raised);
+  display: flex; gap: var(--hair); padding: var(--space-xs);
+  opacity: 0; transform: translateY(0.5rem);
+  transition: opacity var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out);
+}
+.tile:hover .tile__acts, .tile:focus-within .tile__acts { opacity: 1; transform: none; }
+.tile:hover .tile__stage img { transform: scale(1.03); }
+.act {
+  flex: 1 1 0; min-block-size: 1.875rem; border: 0; border-radius: var(--radius-pill);
+  background: oklch(0% 0 0 / 0.6); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  color: var(--ink); cursor: pointer;
+  font-family: var(--type-figure); font-size: 0.5625rem; letter-spacing: 0.1em; text-transform: uppercase;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+
+.tile__caption { display: grid; gap: var(--space-3xs); min-width: 0; }
+.tile__line {
+  display: flex; justify-content: space-between; gap: var(--space-xs);
+  font-family: var(--type-figure); font-size: var(--text-2xs); font-weight: 500;
+  color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+  direction: ltr; unicode-bidi: isolate;
+}
+.tile__meta { font-family: var(--type-figure); font-size: 0.5625rem; color: var(--ink-4); letter-spacing: 0.06em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; unicode-bidi: isolate; }
+.tile__prompt { margin: 0; font-size: var(--text-xs); color: var(--ink-3); text-align: start; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; unicode-bidi: plaintext; }
+
+/* One orchestrated entrance as a tile arrives, then it is simply there.
+   The hidden state is scoped to a class the script adds after it has an
+   observer running, so a tile is visible by default: an entrance that fails
+   open costs a frame, one that fails closed loses the whole library. */
+.tile { transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out); }
+.sheet--staged .tile:not(.is-in) { opacity: 0; transform: translateY(1.25rem) scale(0.97); }
+
+/* ----------------------------------------------------------------- viewer -- */
+
+.viewer { position: fixed; inset: 0; z-index: var(--z-modal); display: grid; grid-template-rows: minmax(0, 1fr) auto; background: oklch(3% 0.002 40 / 0.94); -webkit-backdrop-filter: blur(28px); backdrop-filter: blur(28px); }
+.viewer__stage { display: grid; place-items: center; padding: clamp(var(--space-md), 3vw, var(--space-2xl)); min-block-size: 0; }
+.viewer__stage img, .viewer__stage video { max-inline-size: 100%; max-block-size: 100%; display: block; border-radius: var(--radius-md); }
+.viewer__bar { display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap; padding: var(--space-md) clamp(var(--space-md), 3vw, var(--space-2xl)) var(--space-xl); }
+.viewer__id { display: grid; gap: var(--space-3xs); flex: 1 1 20rem; min-width: 0; }
+.viewer__id p { margin: 0; font-size: var(--text-sm); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; unicode-bidi: plaintext; text-align: start; }
+.viewer__telemetry { font-family: var(--type-figure); font-size: 0.5625rem; color: var(--ink-4); letter-spacing: 0.1em; direction: ltr; unicode-bidi: isolate; }
+.key {
+  min-block-size: 2.25rem; padding-inline: var(--space-md);
+  display: inline-flex; align-items: center; gap: var(--space-2xs);
+  border: var(--hair) solid var(--glass-edge); border-radius: var(--radius-pill);
+  background: transparent; color: var(--ink);
+  font-family: var(--type-figure); font-size: var(--text-2xs); letter-spacing: 0.08em;
+  text-transform: uppercase; text-decoration: none; cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.key--on { background: var(--ember); border-color: var(--ember); color: var(--ember-ink); }
+
+/* ---------------------------------------------------------------- footing -- */
+
+.footing {
+  position: relative; background: var(--void);
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-lg); flex-wrap: wrap;
+  padding: var(--space-lg) clamp(var(--space-md), 2.5vw, var(--space-xl)) var(--space-2xl);
+  border-block-start: var(--hair) solid oklch(100% 0 0 / 0.08);
+}
+.colophon { margin: 0; max-inline-size: 52ch; font-size: var(--text-xs); color: var(--ink-4); line-height: 1.6; text-align: start; }
+
+/* ------------------------------------------------------------------ state -- */
+
+:focus-visible { outline: 2px solid var(--ember-hot); outline-offset: 2px; }
+.composer__well:has(textarea:focus-visible) { background: var(--glass-fill-lit); }
+.composer textarea:focus-visible { outline: 0; }
+
+@media (hover: hover) and (pointer: fine) {
+  .rate:not(:disabled):not(.is-active):hover { background: var(--glass-fill); }
+  .rate:not(:disabled):not(.is-active):hover .rate__name { color: var(--ink); }
+  .segment:not(:disabled):not([aria-pressed="true"]):hover { color: var(--ink); border-color: var(--glass-edge-lit); }
+  .runkey:not(:disabled):not(.runkey--armed):hover { background: var(--ember); color: var(--ember-ink); }
+  .runkey--armed:hover { background: var(--ember-hot); }
+  .attach:hover { color: var(--ink); border-color: var(--glass-edge-lit); }
+  .act:hover { background: var(--ink); color: var(--void); }
+  .key:hover { background: var(--glass-fill-lit); }
+  .key--on:hover { background: var(--ember-hot); }
+  .lang:not([aria-pressed="true"]):hover { color: var(--ink); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .stage__frame { animation: none; transform: none; }
+  .live__scan i { inline-size: 100%; animation: none; opacity: 0.5; }
+  .sheet--staged .tile:not(.is-in) { opacity: 1; transform: none; }
+  .tile__acts { opacity: 1; transform: none; }
+  /* The lens tracks a pointer, so it is motion by definition — cut it. */
+  .stage.is-lit .stage__lens { opacity: 0; }
+}
+
+/* ----------------------------------------------------------------- narrow -- */
+
+@media (max-width: 68rem) {
+  .console {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(6rem, 1fr) auto auto;
+    row-gap: var(--space-md);
+    padding-block-start: 7rem;
+  }
+  /* The plate leads so the quote and the RUN key stay above the fold; the rate
+     card follows. Reversed, the rates push the only action off a phone. */
+  .plate { grid-column: 1; grid-row: 2; }
+  .rail  { grid-column: 1; grid-row: 3; }
+  .sheet { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tile:nth-child(6n + 1) { grid-column: span 2; }
+}
+
+@media (max-width: 40rem) {
+  .mast { padding-inline: var(--space-md); }
+  /* Three wrapped lines of strapline is not a wordmark. */
+  .wordmark small { display: none; }
+  .mast__right { flex-wrap: wrap; justify-content: flex-end; }
+  .find, .ledger__tools { inline-size: 100%; }
+  .runkey { flex: 1 1 auto; justify-content: center; }
+  .composer__right { flex: 1 1 11rem; }
+  .recipe { order: 3; flex-basis: 100%; text-align: start; }
+  .sheet { grid-template-columns: minmax(0, 1fr); }
+  .tile:nth-child(6n + 1) { grid-column: span 1; }
+}
+
+/* -------------------------------------------------------------------- rtl -- */
+
+[dir="rtl"] .arrow { transform: scaleX(-1); }
+[dir="rtl"] .live__scan i { animation-direction: alternate-reverse; }
