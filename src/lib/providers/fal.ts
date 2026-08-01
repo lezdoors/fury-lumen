@@ -1,3 +1,4 @@
+import { inlineLocalAsset } from "../assets";
 import { canPersist, saveGeneratedAsset } from "../files";
 import { estimateCost } from "../types";
 import type { GenerationInput, GenerationJob, ProviderModel } from "../types";
@@ -78,7 +79,12 @@ export class FalVideoProvider implements GenerationProvider {
     if (input.durationSeconds) payload.duration = String(input.durationSeconds);
     // A reference image switches the model into image-to-video. The caller is
     // responsible for choosing an image-to-video endpoint when it passes one.
-    if (input.referenceUrls?.length) payload.image_url = input.referenceUrls[0];
+    //
+    // The reference is held locally, so fal cannot fetch it back — the bytes go
+    // out inline as a data URI instead. Anything already remote is passed
+    // through untouched.
+    const reference = input.referenceUrls?.[0];
+    if (reference) payload.image_url = (await inlineLocalAsset(reference)) ?? reference;
 
     const response = await fetch(`${QUEUE_BASE}/${endpoint}`, {
       method: "POST",

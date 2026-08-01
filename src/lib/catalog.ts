@@ -116,10 +116,10 @@ export function getModels(): ProviderModel[] {
       asynchronous: true,
     })),
     {
-      id: process.env.OPENAI_IMAGE_MODEL ?? "openai-image",
+      id: process.env.OPENAI_IMAGE_MODEL || "openai-image",
       providerId: "openai",
       providerLabel: "OpenAI",
-      label: process.env.OPENAI_IMAGE_MODEL ?? "Configure OPENAI_IMAGE_MODEL",
+      label: process.env.OPENAI_IMAGE_MODEL || "OpenAI image · not configured",
       mediaKind: "image",
       available: openAIReady,
       availabilityReason: openAIReady ? undefined : "Add OPENAI_API_KEY and OPENAI_IMAGE_MODEL",
