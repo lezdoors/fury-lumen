@@ -1,139 +1,210 @@
-# Lumen — asset prompt brief: **HEAT IS THE PRICE**
+# Lumen — prompt brief: **ONE DROP**
 
-Written 2026-07-31. **Ryan fires these in the Higgsfield UI. No agent generates.**
+Written 2026-07-31 via `cinematic-scroll-site`. **Ryan fires these in the
+Higgsfield UI. No agent generates.**
 
-Adapted from the One-Prompt Website Pack (Fable5 · Higgsfield) and the ChatGPT
-Website Creator pack, using their two load-bearing techniques:
+---
 
-1. **One anchor still first, referenced by every clip.** The anchor locks the
-   world. Without it Seedance invents a slightly different planet per clip and
-   the set never cuts together.
-2. **Start frame = end frame** on the field clip. Seedance 2.0 accepts both, and
-   handing it the same image for each is what makes a loop that does not jump.
-   This is the single most important instruction in the brief — the field runs
-   behind the console for minutes at a time and a visible seam every ten seconds
-   is worse than a still.
+## Step −1 · Does a scroll-film fit this business?
+
+Run before anything, because picking wrong is the expensive mistake — not the
+credits.
+
+**The app: no scrub, ever.** Lumen is a console you type into. A scroll-scrubbed
+frame sequence is a presentation format; you cannot compose a prompt inside a
+film. The app gets an *ambient* field — a loop that plays behind the work — and
+that is a different thing from a scrub.
+
+**A future Lumen landing page: film as PUNCTUATION, resolving to light.** By the
+gate's own table Lumen is SaaS, and the SaaS row says contained inserts on a
+bright, information-dense ground, because the converting copy is a pricing
+argument that has to be *read*: $0.045/s against credits, no subscription. The
+Menana verdict — *"too dark, means nothing, no revelation"* — was a full dark
+film treated as the whole world of a services business. Lumen would fail the
+same way.
+
+The one thing that differs: Lumen's product **is** generated video, so the film
+is the merchandise rather than borrowed mood. That earns a dark hero — and only
+a hero. The page must then **resolve to light** where the prices live. That is
+both the legibility fix and the narrative: a dark room, the work, then the
+number in daylight.
+
+---
+
+## Step 0 · Inventory — done, and it came back empty
+
+Checked before writing a word, per the standing correction (*"check hf first"*).
+
+- **Higgsfield history:** 27 Seedance 2.0 jobs + Kling 3.0 + Gemini Omni.
+- **Drive crawl `Higgsfield Export`:** 974 files / 20 GB, **73 videos**.
+- **Repo `public/`:** the two shipped stills, nothing else.
+
+**Nothing is reusable.** Everything in the crawl belongs to another brand:
+Maison Tanneurs (leather macros, turntables, terrace walk), Amira (riad
+courtyards, gala pools), and the magenta-beam corridor / red-safelight darkroom
+set, which is **AKAL's locked "Machined Optics" register** — reusing it would
+collide with a live portfolio row. Zero ink, splash, paint or pigment in 974
+files. The gap is real, so the generation is justified.
+
+---
+
+## Register lock
+
+`REGISTER.md` (KILN) owns the style; this brief owns structure only.
+
+Black room. One lit event. The interface never colours itself — white type,
+ember only for live and go. **The full spectrum lives in the field because the
+field is a picture**, the same as any clip in the ledger. That is the rule that
+lets a colour detonation sit inside a one-accent register without breaking it.
+
+**Palette is a painter's, not a computer's:** vermilion into magenta into deep
+violet, and exactly one stab of cyan. Never "rainbow", never "all colours" —
+full-spectrum prompts are what produce the RGB-soup tell.
 
 ---
 
 ## The idea
 
-Lumen's whole argument is that you see the dollar before you spend it, and its
-enemy is the credit — a token that exists to make the dollar invisible. The
-register the app already runs in (`REGISTER.md`, KILN) says the same thing in
-material: **compute costs money the way it costs heat.**
+**One drop of pigment falls into black water and detonates into an entire
+world — and reversed, the whole world collapses back into one drop.**
 
-So the film is one world — a black void with incandescence in it — shot three
-ways. No product, no person, no text, no place. Just heat behaving.
+That is Lumen in a single physical event. One prompt, one payment, one bloom.
+And the reverse is the thesis: everything you just made, resolving back to one
+number.
 
-Three clips, three aspect ratios, one anchor. That is deliberate: the field
-needs 16:9, and the ledger grid has never once been tested on a portrait or a
-square, so the set doubles as the archive's first honest content.
+It also solves three problems at once:
 
-The same three clips become the hero film for a Lumen landing page later. Same
-world, no second shoot.
+- The current field is a slow molten drift — funereal. *"Make anything"* should
+  detonate, not mourn.
+- **Backwards is free magic.** The collapse is the bloom scrubbed in reverse:
+  a second chapter at zero extra credits, planned for before buying clips.
+- **It loops perfectly.** A detonation does not loop, but bloom-then-collapse
+  does — I ping-pong it in ffmpeg locally, so the field breathes forever with
+  no seam and no second generation.
 
----
-
-## Step 1 — the anchor still
-
-Generate **one 16:9 still** first. Best current image model in the catalogue
-(GPT Image 2 or Nano Banana Pro). Download it. It is the image reference on
-**every** clip below.
-
-```
-A vast black volcanic plain photographed from high above at night. A dark
-basalt crust fractured into ridges and plates, and running beneath the cracks a
-network of molten seams glowing white at the core and falling through ember
-orange to deep red at the edges. Heat haze rising off the hottest fissures.
-Pure black sky, no horizon, no stars. Photorealistic aerial photography, long
-lens, shallow atmospheric depth, fine volcanic grain. Extremely dark overall —
-the glow occupies less than a fifth of the frame and the rest is true black.
-No people, no structures, no text, no watermark.
-```
-
-**Why it is composed this way:** the still sits behind a live interface at
-roughly a third of its brightness with white type over it. Anything busier than
-a fifth of the frame lit will fight the quote. If the first take comes back
-bright, ask for "darker, less glow, more black" and take it again — that one
-note decides whether the whole thing works.
+It also survives the Menana scrub test: a detonating bloom is enormous spatial
+recomposition. A locked-off camera with liquid micro-motion is beautiful at
+24fps and **dead** when scrubbed, and that is the trap this avoids.
 
 ---
 
-## Step 2 — the three clips
+## Hero still — free, so iterate it hard
 
-Seedance 2.0 · std mode · 1080p · **no audio** · 10s · **the anchor still as
-image reference on all three.**
-
-### CLIP A — THE FIELD · 16:9 · *the app background*
-
-**Set start frame AND end frame to the anchor still.** That is what closes the
-loop.
+Stills do not meter on your plan. Generate wide, curate hard, and do not fire a
+single clip until one still is unarguable. Best image model in the catalogue,
+**16:9**. Folder: `lumen-drop`.
 
 ```
-Slow continuous aerial drift across the molten plain, camera moving steadily
-right to left at constant speed and returning to where it began. The molten
-seams pulse and breathe with strong visible intensity, brightening and dimming
-like something under pressure. Heat haze distorts the air above the hottest
-fissures. Fine embers lift and drift. The crust itself does not move. No cuts,
-no zoom, no rotation, no camera shake. One unbroken shot, hypnotic, glacial.
+A single dense bloom of vermilion and magenta pigment suspended in perfectly
+still black water, caught at its most violent instant — a hot opaque core with
+filaments and veils tearing outward from it, one thin thread of cyan cutting
+through. Deep violet where the pigment thins into the dark. Pure black
+surround, no vessel, no surface, no horizon. Macro photography, single hard
+light from the left raking across the pigment, everything else falling to true
+black. Photorealistic, high grain, extremely high contrast. No people, no text,
+no watermark.
 ```
 
-Motion note: "pulse and breathe with strong visible intensity" is deliberate.
-Asking Seedance for subtle motion returns a still with noise on it.
+**Reject any take where the colour fills more than a third of the frame.** The
+field sits behind a live interface at a third of its brightness with the quote
+in white over it. Bright and busy loses the argument to the wallpaper.
 
-### CLIP B — THE POUR · 9:16 · *ledger, portrait*
+---
+
+## Clips — Seedance 2.0 · std · 1080p · no audio · ~10s · anchor as image reference on all three
+
+Slot order per the formula: scene → camera → subject → environment → one style
+word + lighting → motion tone.
+
+### `lumen-drop-shot-1` · THE BLOOM · **16:9** · the field · 2–3 takes
+
+The only clip worth more than one take — it is the hero and the other two are
+first-acceptable.
+
+**Start frame:** near-black still (ask for the anchor's own opening state).
+**End frame:** the anchor. Locking both ends is what forces the big travel that
+makes it scrub instead of shimmer.
 
 ```
-A single ribbon of white-hot molten metal falling vertically through pure
-black, coiling and folding on itself as it descends, surface tension pulling it
-into slow rolling waves. White at the core, ember orange at the edges. Bright
-sparks separate from the stream and drift upward. Macro, dramatic, constant
-speed, continuous — the pour never stops and nothing else is in frame. Void
-black background, no vessel, no floor, no people, no text.
+A single drop of vermilion pigment enters the top of the frame and strikes
+still black water. The camera holds locked and dead-on, pulling back slowly and
+steadily as the frame fills. The pigment detonates outward from the impact into
+long tearing filaments and unfurling veils, magenta blooming behind the
+vermilion, deep violet trailing where it thins, one thread of cyan whipping
+through the middle. Pure black void, no vessel, no surface. Cinematic, single
+hard raking light from the left, everything unlit falling to true black.
+Violent and fast at the impact, then expanding with real weight and momentum —
+never floating, never gentle.
 ```
 
-### CLIP C — THE COOL · 1:1 · *ledger, square*
+### `lumen-drop-shot-2` · THE VEIL · **9:16** · ledger, portrait
 
 ```
-Extreme macro on the surface of a cooling slab of cast iron. The metal begins
-white hot and cools across the shot: white retreating to ember orange, orange
-to deep red, red to dark grey iron, until only the last thin seam is still lit.
-Crust forms and crazes across the surface in visible fracture lines as it goes.
-Slow steady push-in, no cuts. Void black surround, no people, no text.
+Ink filaments fall in a slow continuous curtain through black water. The camera
+holds locked in extreme macro as the curtain descends past it. Vermilion and
+magenta threads twist around each other and separate, thinning to deep violet
+as they stretch. Pure black void, nothing else in frame. Cinematic, hard side
+light, deep shadow. Continuous heavy descent with real drag in the water, never
+still.
+```
+
+### `lumen-drop-shot-3` · THE COLLISION · **1:1** · ledger, square
+
+```
+Two clouds of pigment drive toward each other and meet in black water. The
+camera holds locked overhead and pushes in slowly through the impact. Vermilion
+from one side and cyan from the other collide, marbling into hard-edged veins
+where they refuse to mix, magenta blooming at the seam. Pure black void, no
+vessel. Cinematic, single hard top light, extreme contrast. Fast aggressive
+collision settling into slow spreading turbulence.
 ```
 
 ---
 
-## Step 3 — hand them over
+## Reverse map — the free chapters
 
-Drop the mp4s into `~/lumen/public/stage/`. Naming does not matter; tell me
-which is which.
+| Clip | Forward | Reversed |
+|---|---|---|
+| shot-1 THE BLOOM | one drop becomes a world | **the world resolves to one drop** — the price |
+| shot-3 THE COLLISION | two pigments collide | two pigments separate, cleanly |
 
-I will:
-
-- wire **CLIP A** as the field, replacing the shipped still;
-- verify the loop has no seam, and if it does, ping-pong it in ffmpeg
-  (forward then reversed, concatenated) so it is seamless regardless;
-- put **B** and **C** through the ledger as real archive entries and finally
-  test the grid on a portrait and a square, which it has never seen;
-- report what actually breaks.
+Budget three clips, get five chapters. Nothing here needs a fourth generation.
 
 ---
 
 ## Spend
 
-One still plus three 10-second Seedance clips is roughly the packs' own quoted
-figure — about 100 credits, call it five dollars. **Take one clip at a time and
-look at it before firing the next.** If the anchor comes back too bright,
-nothing downstream is worth generating.
+**Stills are free on your plan** — only video meters. Three 10s Seedance clips
+is roughly 100 credits, about five dollars, plus one extra hero take if shot-1
+needs it.
+
+**Fire in this order and stop between each:** anchor still → look at it → shot-1
+→ look at it → shots 2 and 3 together. If the anchor is wrong nothing
+downstream is worth buying, and two rejected directions at clip scale is how
+640 credits disappeared on Menana.
+
+---
+
+## Hand-off — what I do with them
+
+Drop the mp4s in `~/lumen/public/stage/` and say which is which.
+
+- **shot-1** becomes the field: ping-ponged in ffmpeg (forward + reversed,
+  concatenated) so it breathes with no seam, compressed for web.
+- **shots 2 and 3** go into the ledger as real archive entries — the grid has
+  never been tested on a portrait or a square and this is the first honest test
+  of it.
+- If any of it is ever scrubbed rather than played, it gets re-encoded
+  keyframe-dense (`-g 4 -keyint_min 4 -sc_threshold 0`) or extracted to a JPEG
+  sequence at **native fps**. Raw HF exports carry one keyframe in the whole
+  file and every seek decodes from frame zero.
 
 ---
 
 ## Rules this brief keeps
 
-- No text of any kind in any prompt — generated lettering is always wrong.
-- No brand names.
+- Prompts only — every model meters despite the badges. Ryan fires in the UI.
+- No brand names. No AI-rendered text in any image prompt.
+- The reference carries the world; the prompt is environment, camera, motion.
 - Motion is never described as subtle.
-- The reference carries the world; the prompt describes the environment.
-- Nothing here is fired by an agent. These are for the Higgsfield UI.
+- Register comes from `REGISTER.md`; this brief contributes structure only.
