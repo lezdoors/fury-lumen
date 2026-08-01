@@ -36,226 +36,409 @@ export function resolveLocale(candidates: readonly string[]): Locale {
   return "en";
 }
 
+function intl(locale: Locale, options: Intl.NumberFormatOptions) {
+  const tag = locale === "ar" ? "ar-MA" : locale;
+  return new Intl.NumberFormat(tag, {
+    style: "currency",
+    currency: "USD",
+    numberingSystem: "latn",
+    ...options,
+  });
+}
+
 /**
  * Costs stay in USD because that is what the provider bills, but the number
  * itself is formatted for the reader. ar-MA uses Western digits, which is what
  * Moroccan users expect for money.
  */
 export function formatMoney(value: number, locale: Locale) {
-  const tag = locale === "ar" ? "ar-MA" : locale;
   try {
-    return new Intl.NumberFormat(tag, {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-      numberingSystem: "latn",
-    }).format(value);
+    return intl(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   } catch {
     return `$${value.toFixed(2)}`;
   }
 }
 
+/**
+ * Rates are quoted per second and run from $0.045 to $0.682 — rounding them to
+ * cents would collapse a fifteen-fold spread into three indistinguishable
+ * values, which is exactly the comparison Lumen exists to show.
+ */
+export function formatRate(value: number, locale: Locale) {
+  try {
+    return intl(locale, { minimumFractionDigits: 3, maximumFractionDigits: 4 }).format(value);
+  } catch {
+    return `$${value.toFixed(3)}`;
+  }
+}
+
 export interface Dictionary {
-  navResults: string;
-  navModels: string;
+  consoleSub: string;
+  quote: string;
+  free: string;
+  flat: string;
+  perSecond: string;
+  noModel: string;
+
   spent: string;
-  idle: string;
-  generatingCount: (count: number) => string;
-  badge: string;
-  headlineTop: string;
-  headlineLead: string;
-  headlineAccent: string;
+  runs: string;
+  live: string;
+
+  rateCard: string;
+  rateUnit: string;
+  needsKey: string;
+  takesReference: string;
+
+  format: string;
+  aspect: string;
+  duration: string;
+  seconds: (value: number) => string;
+
   promptLabel: string;
   promptPlaceholder: string;
-  referenceTitle: string;
-  referenceAria: string;
-  noModel: string;
+  attach: string;
+  attachAria: string;
+  dropHere: string;
+  uploading: string;
+  removeRef: string;
+  switchedForReference: (label: string) => string;
+  noReferenceModel: string;
+
+  run: string;
+  confirm: string;
+  armed: (cost: string) => string;
   sending: string;
-  generateAria: (cost: string) => string;
+  runAria: (cost: string) => string;
+  shortcut: string;
+
   inProgress: string;
   queuedAt: (position: number) => string;
   generating: string;
-  resultsTitle: string;
-  resultsMeta: (count: number, spent: string) => string;
-  resultsEmpty: string;
-  cardFailed: string;
-  cardGenerating: string;
-  videoTag: string;
-  download: string;
+
+  ledger: string;
+  ledgerCount: (count: number, spent: string) => string;
+  find: string;
+  filterAll: string;
+  filterVideo: string;
+  filterImage: string;
+  filterKept: string;
+  filterFailed: string;
+  empty: string;
+  emptyFiltered: string;
+  clearFilters: string;
+
+  again: string;
+  reuse: string;
   keep: string;
   kept: string;
+  waiting: string;
+  failedTag: string;
+  videoTag: string;
+  imageTag: string;
+
+  download: string;
   close: string;
-  modelEyebrow: string;
-  modelTitle: string;
-  aspectRatio: string;
-  duration: string;
-  seconds: (value: number) => string;
-  unavailable: string;
-  costNote: (cost: string) => string;
+  previous: string;
+  next: string;
+
   language: string;
+  colophon: string;
 }
 
 const en: Dictionary = {
-  navResults: "Results",
-  navModels: "Models",
+  consoleSub: "Pay-per-generation console",
+  quote: "Quote",
+  free: "No charge",
+  flat: "flat",
+  perSecond: "/sec",
+  noModel: "No model selected",
+
   spent: "Spent",
-  idle: "Idle",
-  generatingCount: (n) => `${n} generating`,
-  badge: "Pay per generation — no subscription",
-  headlineTop: "Make anything.",
-  headlineLead: "Pay only for",
-  headlineAccent: "what you make",
-  promptLabel: "Describe what to generate",
-  promptPlaceholder: "Describe what you want to create…",
-  referenceTitle: "Reference image — not wired yet",
-  referenceAria: "Add a reference image",
-  noModel: "No model",
-  sending: "Sending…",
-  generateAria: (cost) => `Generate for ${cost}`,
-  inProgress: "In progress",
-  queuedAt: (p) => `queued ${p}`,
-  generating: "generating",
-  resultsTitle: "Your generations",
-  resultsMeta: (n, spent) => `${n} total · ${spent} spent`,
-  resultsEmpty: "Nothing yet. Describe something above and press",
-  cardFailed: "Failed",
-  cardGenerating: "Generating…",
-  videoTag: "VIDEO",
-  download: "Download",
-  keep: "☆ Keep",
-  kept: "★ Kept",
-  close: "Close",
-  modelEyebrow: "MODEL",
-  modelTitle: "What should make it",
-  aspectRatio: "Aspect ratio",
+  runs: "Runs",
+  live: "Live",
+
+  rateCard: "Rate card",
+  rateUnit: "USD / sec",
+  needsKey: "Needs a provider key",
+  takesReference: "REF",
+
+  format: "Format",
+  aspect: "Aspect",
   duration: "Duration",
-  seconds: (v) => `${v} seconds`,
-  unavailable: "unavailable",
-  costNote: (cost) => `Estimated cost is ${cost} per generation. Final billing is the provider's.`,
+  seconds: (v) => `${v}s`,
+
+  promptLabel: "Describe what to generate",
+  promptPlaceholder: "Describe the shot. Drop an image here to animate it.",
+  attach: "Reference frame",
+  attachAria: "Attach a reference frame",
+  dropHere: "Drop to attach",
+  uploading: "Reading file…",
+  removeRef: "Remove reference",
+  switchedForReference: (label) => `Reference attached — switched to ${label}.`,
+  noReferenceModel: "No image-to-video model is available with the current key.",
+
+  run: "Run",
+  confirm: "Confirm",
+  armed: (cost) => `${cost} is above the confirm threshold. Press Run again to charge it.`,
+  sending: "Sending…",
+  runAria: (cost) => `Run this generation for ${cost}`,
+  shortcut: "⌘↵",
+
+  inProgress: "In progress",
+  queuedAt: (p) => `queued · position ${p}`,
+  generating: "generating",
+
+  ledger: "Ledger",
+  ledgerCount: (n, spent) => `${n} runs · ${spent}`,
+  find: "Find a prompt",
+  filterAll: "All",
+  filterVideo: "Video",
+  filterImage: "Image",
+  filterKept: "Kept",
+  filterFailed: "Failed",
+  empty: "Nothing has been run yet. Describe something above and press ⌘↵. Proof mode renders a real clip for nothing, so the whole loop can be tried before any money moves.",
+  emptyFiltered: "No run matches this filter.",
+  clearFilters: "Clear",
+
+  again: "Again",
+  reuse: "Reuse",
+  keep: "Keep",
+  kept: "Kept",
+  waiting: "Working…",
+  failedTag: "Failed",
+  videoTag: "VIDEO",
+  imageTag: "STILL",
+
+  download: "Download",
+  close: "Close",
+  previous: "Previous",
+  next: "Next",
+
   language: "Language",
+  colophon:
+    "Rates are the provider's own, quoted per second of output. Lumen adds no margin and sells no credits.",
 };
 
 const fr: Dictionary = {
-  navResults: "Résultats",
-  navModels: "Modèles",
+  consoleSub: "Console au coût par génération",
+  quote: "Devis",
+  free: "Sans frais",
+  flat: "fixe",
+  perSecond: "/sec",
+  noModel: "Aucun modèle sélectionné",
+
   spent: "Dépensé",
-  idle: "Inactif",
-  generatingCount: (n) => `${n} en cours`,
-  badge: "Paiement à la génération — sans abonnement",
-  headlineTop: "Créez ce que vous voulez.",
-  headlineLead: "Ne payez que",
-  headlineAccent: "ce que vous créez",
-  promptLabel: "Décrivez ce qu'il faut générer",
-  promptPlaceholder: "Décrivez ce que vous voulez créer…",
-  referenceTitle: "Image de référence — pas encore active",
-  referenceAria: "Ajouter une image de référence",
-  noModel: "Aucun modèle",
-  sending: "Envoi…",
-  generateAria: (cost) => `Générer pour ${cost}`,
-  inProgress: "En cours",
-  queuedAt: (p) => `en file ${p}`,
-  generating: "génération",
-  resultsTitle: "Vos générations",
-  resultsMeta: (n, spent) => `${n} au total · ${spent} dépensés`,
-  resultsEmpty: "Rien pour l'instant. Décrivez quelque chose ci-dessus puis appuyez sur",
-  cardFailed: "Échec",
-  cardGenerating: "Génération…",
-  videoTag: "VIDÉO",
-  download: "Télécharger",
-  keep: "☆ Garder",
-  kept: "★ Gardé",
-  close: "Fermer",
-  modelEyebrow: "MODÈLE",
-  modelTitle: "Qui doit le créer",
-  aspectRatio: "Format",
+  runs: "Exécutions",
+  live: "En cours",
+
+  rateCard: "Tarifs",
+  rateUnit: "USD / sec",
+  needsKey: "Clé fournisseur requise",
+  takesReference: "RÉF",
+
+  format: "Format",
+  aspect: "Cadrage",
   duration: "Durée",
-  seconds: (v) => `${v} secondes`,
-  unavailable: "indisponible",
-  costNote: (cost) =>
-    `Coût estimé : ${cost} par génération. La facturation finale est celle du fournisseur.`,
+  seconds: (v) => `${v}s`,
+
+  promptLabel: "Décrivez ce qu'il faut générer",
+  promptPlaceholder: "Décrivez le plan. Déposez une image ici pour l'animer.",
+  attach: "Image de référence",
+  attachAria: "Joindre une image de référence",
+  dropHere: "Déposez pour joindre",
+  uploading: "Lecture du fichier…",
+  removeRef: "Retirer la référence",
+  switchedForReference: (label) => `Référence jointe — bascule vers ${label}.`,
+  noReferenceModel: "Aucun modèle image-vers-vidéo n'est disponible avec la clé actuelle.",
+
+  run: "Lancer",
+  confirm: "Confirmer",
+  armed: (cost) => `${cost} dépasse le seuil de confirmation. Appuyez de nouveau pour débiter.`,
+  sending: "Envoi…",
+  runAria: (cost) => `Lancer cette génération pour ${cost}`,
+  shortcut: "⌘↵",
+
+  inProgress: "En cours",
+  queuedAt: (p) => `en file · position ${p}`,
+  generating: "génération",
+
+  ledger: "Registre",
+  ledgerCount: (n, spent) => `${n} exécutions · ${spent}`,
+  find: "Chercher une consigne",
+  filterAll: "Tout",
+  filterVideo: "Vidéo",
+  filterImage: "Image",
+  filterKept: "Gardés",
+  filterFailed: "Échecs",
+  empty: "Rien n'a encore été lancé. Décrivez quelque chose ci-dessus puis appuyez sur ⌘↵. Le mode démonstration produit un vrai clip sans frais, donc toute la boucle se teste avant le moindre débit.",
+  emptyFiltered: "Aucune exécution ne correspond à ce filtre.",
+  clearFilters: "Effacer",
+
+  again: "Relancer",
+  reuse: "Reprendre",
+  keep: "Garder",
+  kept: "Gardé",
+  waiting: "En cours…",
+  failedTag: "Échec",
+  videoTag: "VIDÉO",
+  imageTag: "IMAGE",
+
+  download: "Télécharger",
+  close: "Fermer",
+  previous: "Précédent",
+  next: "Suivant",
+
   language: "Langue",
+  colophon:
+    "Les tarifs sont ceux du fournisseur, à la seconde de sortie. Lumen n'ajoute aucune marge et ne vend aucun crédit.",
 };
 
 const es: Dictionary = {
-  navResults: "Resultados",
-  navModels: "Modelos",
+  consoleSub: "Consola de pago por generación",
+  quote: "Presupuesto",
+  free: "Sin cargo",
+  flat: "fijo",
+  perSecond: "/seg",
+  noModel: "Ningún modelo seleccionado",
+
   spent: "Gastado",
-  idle: "Inactivo",
-  generatingCount: (n) => `${n} generando`,
-  badge: "Pago por generación — sin suscripción",
-  headlineTop: "Crea lo que quieras.",
-  headlineLead: "Paga solo por",
-  headlineAccent: "lo que creas",
-  promptLabel: "Describe qué generar",
-  promptPlaceholder: "Describe lo que quieres crear…",
-  referenceTitle: "Imagen de referencia — aún no disponible",
-  referenceAria: "Añadir una imagen de referencia",
-  noModel: "Sin modelo",
-  sending: "Enviando…",
-  generateAria: (cost) => `Generar por ${cost}`,
-  inProgress: "En curso",
-  queuedAt: (p) => `en cola ${p}`,
-  generating: "generando",
-  resultsTitle: "Tus generaciones",
-  resultsMeta: (n, spent) => `${n} en total · ${spent} gastados`,
-  resultsEmpty: "Nada todavía. Describe algo arriba y pulsa",
-  cardFailed: "Fallido",
-  cardGenerating: "Generando…",
-  videoTag: "VÍDEO",
-  download: "Descargar",
-  keep: "☆ Guardar",
-  kept: "★ Guardado",
-  close: "Cerrar",
-  modelEyebrow: "MODELO",
-  modelTitle: "Qué debe crearlo",
-  aspectRatio: "Formato",
+  runs: "Ejecuciones",
+  live: "En curso",
+
+  rateCard: "Tarifas",
+  rateUnit: "USD / seg",
+  needsKey: "Falta la clave del proveedor",
+  takesReference: "REF",
+
+  format: "Formato",
+  aspect: "Encuadre",
   duration: "Duración",
-  seconds: (v) => `${v} segundos`,
-  unavailable: "no disponible",
-  costNote: (cost) =>
-    `Coste estimado: ${cost} por generación. La facturación final es la del proveedor.`,
+  seconds: (v) => `${v}s`,
+
+  promptLabel: "Describe qué generar",
+  promptPlaceholder: "Describe el plano. Suelta una imagen aquí para animarla.",
+  attach: "Imagen de referencia",
+  attachAria: "Adjuntar una imagen de referencia",
+  dropHere: "Suelta para adjuntar",
+  uploading: "Leyendo el archivo…",
+  removeRef: "Quitar la referencia",
+  switchedForReference: (label) => `Referencia adjunta: se cambió a ${label}.`,
+  noReferenceModel: "No hay ningún modelo de imagen a vídeo disponible con la clave actual.",
+
+  run: "Ejecutar",
+  confirm: "Confirmar",
+  armed: (cost) => `${cost} supera el umbral de confirmación. Pulsa de nuevo para cobrarlo.`,
+  sending: "Enviando…",
+  runAria: (cost) => `Ejecutar esta generación por ${cost}`,
+  shortcut: "⌘↵",
+
+  inProgress: "En curso",
+  queuedAt: (p) => `en cola · posición ${p}`,
+  generating: "generando",
+
+  ledger: "Registro",
+  ledgerCount: (n, spent) => `${n} ejecuciones · ${spent}`,
+  find: "Buscar una indicación",
+  filterAll: "Todo",
+  filterVideo: "Vídeo",
+  filterImage: "Imagen",
+  filterKept: "Guardados",
+  filterFailed: "Fallidos",
+  empty: "Todavía no se ha ejecutado nada. Describe algo arriba y pulsa ⌘↵. El modo de prueba genera un clip real sin coste, así que puedes recorrer todo el ciclo antes de mover dinero.",
+  emptyFiltered: "Ninguna ejecución coincide con este filtro.",
+  clearFilters: "Limpiar",
+
+  again: "Repetir",
+  reuse: "Reutilizar",
+  keep: "Guardar",
+  kept: "Guardado",
+  waiting: "Trabajando…",
+  failedTag: "Fallido",
+  videoTag: "VÍDEO",
+  imageTag: "IMAGEN",
+
+  download: "Descargar",
+  close: "Cerrar",
+  previous: "Anterior",
+  next: "Siguiente",
+
   language: "Idioma",
+  colophon:
+    "Las tarifas son las del proveedor, por segundo de salida. Lumen no añade margen ni vende créditos.",
 };
 
 const ar: Dictionary = {
-  navResults: "النتائج",
-  navModels: "النماذج",
+  consoleSub: "لوحة الدفع لكل عملية توليد",
+  quote: "التسعيرة",
+  free: "بدون رسوم",
+  flat: "ثابت",
+  perSecond: "/ث",
+  noModel: "لم يُختَر أي نموذج",
+
   spent: "أُنفق",
-  idle: "خامل",
-  generatingCount: (n) => `${n} قيد التوليد`,
-  badge: "الدفع لكل عملية توليد — بدون اشتراك",
-  headlineTop: "أنشئ أي شيء.",
-  headlineLead: "ادفع فقط مقابل",
-  headlineAccent: "ما تنشئه",
-  promptLabel: "صف ما تريد توليده",
-  promptPlaceholder: "صف ما تريد إنشاءه…",
-  referenceTitle: "صورة مرجعية — غير مفعّلة بعد",
-  referenceAria: "إضافة صورة مرجعية",
-  noModel: "لا يوجد نموذج",
-  sending: "جارٍ الإرسال…",
-  generateAria: (cost) => `توليد مقابل ${cost}`,
-  inProgress: "قيد التنفيذ",
-  queuedAt: (p) => `في الانتظار ${p}`,
-  generating: "قيد التوليد",
-  resultsTitle: "أعمالك",
-  resultsMeta: (n, spent) => `${n} إجمالاً · ${spent} أُنفقت`,
-  resultsEmpty: "لا شيء بعد. صف شيئاً في الأعلى ثم اضغط",
-  cardFailed: "فشل",
-  cardGenerating: "جارٍ التوليد…",
-  videoTag: "فيديو",
-  download: "تنزيل",
-  keep: "☆ حفظ",
-  kept: "★ محفوظ",
-  close: "إغلاق",
-  modelEyebrow: "النموذج",
-  modelTitle: "ما الذي سينشئه",
-  aspectRatio: "نسبة العرض",
+  runs: "العمليات",
+  live: "جارية",
+
+  rateCard: "قائمة الأسعار",
+  rateUnit: "دولار / ثانية",
+  needsKey: "يلزم مفتاح المزوّد",
+  takesReference: "مرجع",
+
+  format: "الصيغة",
+  aspect: "نسبة العرض",
   duration: "المدة",
-  seconds: (v) => `${v} ثوانٍ`,
-  unavailable: "غير متاح",
-  costNote: (cost) => `التكلفة التقديرية ${cost} لكل عملية توليد. الفوترة النهائية من المزوّد.`,
+  seconds: (v) => `${v}ث`,
+
+  promptLabel: "صف ما تريد توليده",
+  promptPlaceholder: "صف اللقطة. أفلت صورة هنا لتحريكها.",
+  attach: "صورة مرجعية",
+  attachAria: "إرفاق صورة مرجعية",
+  dropHere: "أفلت للإرفاق",
+  uploading: "جارٍ قراءة الملف…",
+  removeRef: "إزالة المرجع",
+  switchedForReference: (label) => `أُرفقت صورة مرجعية — تم التحويل إلى ${label}.`,
+  noReferenceModel: "لا يتوفر نموذج من صورة إلى فيديو بالمفتاح الحالي.",
+
+  run: "تشغيل",
+  confirm: "تأكيد",
+  armed: (cost) => `${cost} يتجاوز حد التأكيد. اضغط تشغيل مرة أخرى للخصم.`,
+  sending: "جارٍ الإرسال…",
+  runAria: (cost) => `تشغيل هذه العملية مقابل ${cost}`,
+  shortcut: "⌘↵",
+
+  inProgress: "قيد التنفيذ",
+  queuedAt: (p) => `في الانتظار · الموضع ${p}`,
+  generating: "قيد التوليد",
+
+  ledger: "السجل",
+  ledgerCount: (n, spent) => `${n} عملية · ${spent}`,
+  find: "ابحث في الأوامر",
+  filterAll: "الكل",
+  filterVideo: "فيديو",
+  filterImage: "صورة",
+  filterKept: "المحفوظة",
+  filterFailed: "الفاشلة",
+  empty: "لم تُنفَّذ أي عملية بعد. صف شيئاً في الأعلى ثم اضغط ⌘↵. يولّد وضع التجربة مقطعاً حقيقياً بلا تكلفة، فتُجرَّب الدورة كاملة قبل أي خصم.",
+  emptyFiltered: "لا توجد عملية تطابق هذا المرشّح.",
+  clearFilters: "مسح",
+
+  again: "إعادة",
+  reuse: "استخدام",
+  keep: "حفظ",
+  kept: "محفوظ",
+  waiting: "جارٍ العمل…",
+  failedTag: "فشل",
+  videoTag: "فيديو",
+  imageTag: "صورة",
+
+  download: "تنزيل",
+  close: "إغلاق",
+  previous: "السابق",
+  next: "التالي",
+
   language: "اللغة",
+  colophon:
+    "الأسعار هي أسعار المزوّد نفسه، لكل ثانية من الناتج. لا تضيف Lumen أي هامش ولا تبيع أي أرصدة.",
 };
 
 export const DICTIONARIES: Record<Locale, Dictionary> = { en, fr, es, ar };

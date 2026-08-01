@@ -1,5 +1,14 @@
 [
   {
+    "date": "2026-07-31",
+    "macrostructure": "bespoke — Panel (instrument chassis + cut wells)",
+    "theme": "custom",
+    "theme_axes": "light paper / mono display / warm accent",
+    "vibe": "machine instrument, silkscreen, lacquered signal",
+    "enrichment": "none",
+    "brief": "Lumen PANEL rebuild — pay-per-generation console, AgentFlow retired"
+  },
+  {
     "date": "2026-07-30",
     "macrostructure": "Workbench",
     "theme": "Midnight",

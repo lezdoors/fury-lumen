@@ -1,87 +1,119 @@
-/* Lumen · Single Room · register: Roobinium — saturated orange into true black */
+/* Hallmark · genre: modern-minimal · macrostructure: bespoke "Panel"
+ * theme: custom · vibe: "machine instrument, silkscreen, lacquered signal"
+ * paper oklch(91.5% 0.004 240) · accent oklch(56% 0.212 29)
+ * axes: light paper / mono display / warm accent
+ * type: Martian Mono (panel) + Geist (ui) + Geist Mono (data)
+ * pre-emit critique: P5 H5 E4 S5 R5 V5
+ */
+
+/* --------------------------------------------------------------------------
+ * PANEL — Lumen's register.
+ *
+ * The interface is the front of a machine that turns dollars into footage, so
+ * it is built from exactly two materials and one signal colour.
+ *
+ *   CHASSIS  a pale cool panel. Labels are silkscreened onto it; rules are
+ *            engraved into it. Nothing floats above it and nothing blurs.
+ *   WELL     a dark recess cut through the chassis. Anywhere the machine shows
+ *            you something — media, the prompt, the price — the panel is cut
+ *            away and you look into it.
+ *   SIGNAL   one lacquered vermilion, rationed. It means money, live, or go.
+ *            It is never used for a link, a border, or emphasis.
+ *
+ * Depth is drawn with two 1px lines, never with a shadow: light on the upper
+ * edge and dark on the lower edge reads as raised; the inverse reads as cut.
+ * A single light source above is what makes a drawn panel read as a real one.
+ * ------------------------------------------------------------------------- */
+
 :root {
-  /* Roobinium's grounds are warm-black with real red in them, not neutral grey.
-     Chroma is deliberately non-zero on every surface so the dark reads as heat
-     rather than as slate. */
-  --color-paper: oklch(9% 0.016 38);
-  --color-paper-2: oklch(14% 0.024 38);
-  --color-paper-3: oklch(22% 0.038 38);
-  --color-stage: oklch(7% 0.012 38);
-  --color-rule: oklch(30% 0.035 40);
-  --color-rule-strong: oklch(44% 0.055 42);
-  --color-neutral: oklch(66% 0.022 50);
-  --color-muted: oklch(77% 0.020 55);
-  --color-ink: oklch(96% 0.014 70);
-  --color-ink-soft: oklch(88% 0.020 62);
+  /* -- chassis ------------------------------------------------------------ */
+  --chassis: oklch(91.5% 0.004 240);
+  --chassis-lit: oklch(95.5% 0.003 240);
+  --chassis-deep: oklch(87% 0.005 240);
+  --chassis-shelf: oklch(84% 0.006 240);
 
-  /* The reference orange is fully saturated — this is the correction. The old
-     value sat at 0.120 chroma and read brown against the imagery. */
-  --color-accent: oklch(70% 0.205 46);
-  --color-accent-hot: oklch(76% 0.200 55);
-  --color-accent-deep: oklch(52% 0.170 38);
-  --color-accent-ink: oklch(14% 0.030 40);
-  --color-focus: oklch(80% 0.180 58);
-  --color-error: oklch(66% 0.190 22);
-  --color-success: oklch(74% 0.130 150);
-  --color-scrim: oklch(5% 0.014 38 / 0.86);
+  /* -- wells -------------------------------------------------------------- */
+  --well: oklch(19% 0.007 250);
+  --well-deep: oklch(12% 0.006 250);
+  --well-lip: oklch(31% 0.009 250);
+  --well-raised: oklch(25% 0.008 250);
 
-  --font-display: "Geist", "Switzer", ui-sans-serif, sans-serif;
-  --font-body: "Geist", "Switzer", ui-sans-serif, sans-serif;
-  --font-outlier: "Instrument Serif", "Newsreader", ui-serif, serif;
-  --font-mono: "Geist Mono", "IBM Plex Mono", ui-monospace, monospace;
+  /* -- engraving ---------------------------------------------------------- */
+  --engrave: oklch(74% 0.006 240);
+  --engrave-hard: oklch(60% 0.008 240);
+  --emboss: oklch(99% 0.002 240);
 
+  /* -- ink ---------------------------------------------------------------- */
+  --ink: oklch(21% 0.008 250);
+  --ink-2: oklch(44% 0.007 250);
+  --ink-3: oklch(58% 0.006 250);
+  --ink-inv: oklch(94% 0.004 250);
+  --ink-inv-2: oklch(70% 0.006 250);
+  --ink-inv-3: oklch(52% 0.007 250);
+
+  /* -- signal (the only accent) ------------------------------------------- */
+  --signal: oklch(56% 0.212 29);
+  --signal-lit: oklch(64% 0.200 33);
+  --signal-deep: oklch(42% 0.165 28);
+  --signal-ink: oklch(97% 0.018 40);
+  --signal-wash: oklch(56% 0.212 29 / 0.10);
+
+  /* Failure is not a second accent — it is the signal drained of chroma and
+     dropped in lightness, so a dead run reads as unlit rather than as alarm. */
+  --dead: oklch(52% 0.020 250);
+
+  /* -- type --------------------------------------------------------------- */
+  /* Martian Mono is the silkscreen: wordmark, figures, serials, Latin rates.
+     It is never used for translated copy — it is wide, and it has no Arabic. */
+  --type-panel: "Martian Mono", ui-monospace, monospace;
+  --type-ui: "Geist", "SF Arabic", "Geeza Pro", ui-sans-serif, system-ui, sans-serif;
+  --type-data: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --text-2xs: 0.625rem;
   --text-xs: 0.6875rem;
   --text-sm: 0.8125rem;
-  --text-base: 1rem;
-  --text-md: 1.25rem;
-  --text-lg: 1.5625rem;
-  --text-xl: 1.953rem;
-  --text-display: clamp(2.4rem, 4vw + 1rem, 4.75rem);
+  --text-base: 0.9375rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.5rem;
+  --text-meter: clamp(2.25rem, 2.1vw + 1.5rem, 3.125rem);
 
+  --track-label: 0.14em;
+  --track-panel: 0.02em;
+
+  /* -- space (4pt) -------------------------------------------------------- */
   --space-3xs: 0.125rem;
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
-  --space-xl: 2.5rem;
-  --space-2xl: 4rem;
-  --space-3xl: 6rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4.5rem;
 
-  --rule-thin: 1px;
-  --radius-control: 0.75rem;
-  --radius-stage: 1rem;
-  --radius-pill: 999px;
+  /* -- geometry ----------------------------------------------------------- */
+  /* Hard edges. A milled panel has no rounded corners; only the media wells
+     carry the 2px a real cut leaves behind. */
+  --hair: 1px;
+  --radius-well: 2px;
+  --rail-width: 21rem;
 
-  /* Roobinium puts the saturated field at the TOP and lets it fall to true black
-     by mid-screen — its own content areas are black, which is why the whole
-     palette can be adopted without ever tinting a take. */
-  /* The reference's working screens hold the saturated field in the top band and
-     reach true black well before the content area. A slow falloff bathes the whole
-     page in brown and puts a colour cast next to every take. */
-  --bloom-warm:
-    radial-gradient(96% 30% at 50% -6%, oklch(74% 0.210 48 / 1) 0%, oklch(60% 0.195 42 / 0.62) 40%, transparent 76%),
-    radial-gradient(62% 20% at 76% -4%, oklch(78% 0.200 56 / 0.70) 0%, transparent 70%),
-    linear-gradient(to bottom, oklch(30% 0.090 38 / 0.55) 0%, transparent 34%),
-    radial-gradient(120% 22% at 50% 106%, oklch(38% 0.130 32 / 0.45) 0%, transparent 78%);
-  --grid-line: oklch(100% 0 0 / 0.038);
-  --grid-size: 7.5rem;
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  --shadow-float: 0 1px 2px oklch(0% 0 0 / 0.5), 0 16px 40px oklch(0% 0 0 / 0.55);
-  /* The reference's action button is a lit sphere, not a flat disc. */
-  --gradient-action: radial-gradient(120% 120% at 30% 22%, oklch(82% 0.185 62) 0%, oklch(69% 0.210 45) 46%, oklch(56% 0.185 36) 100%);
-  --glow-action: 0 0 0 1px oklch(78% 0.190 52 / 0.45), 0 6px 20px oklch(62% 0.200 45 / 0.42);
+  /* -- material ----------------------------------------------------------- */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --cut: inset 0 1px 0 oklch(0% 0 0 / 0.55), inset 0 -1px 0 var(--emboss);
+  --raised: inset 0 1px 0 var(--emboss), inset 0 -1px 0 oklch(0% 0 0 / 0.16);
 
+  /* -- motion ------------------------------------------------------------- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --dur-micro: 120ms;
-  --dur-short: 200ms;
-  --dur-long: 360ms;
+  --dur-micro: 90ms;
+  --dur-short: 180ms;
+  --dur-long: 320ms;
 
+  /* -- layers ------------------------------------------------------------- */
   --z-base: 1;
   --z-raised: 10;
   --z-sticky: 200;
   --z-modal: 400;
-  --z-tooltip: 600;
 }
