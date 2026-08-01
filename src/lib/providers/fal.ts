@@ -1,4 +1,4 @@
-import { saveGeneratedAsset } from "../files";
+import { canPersist, saveGeneratedAsset } from "../files";
 import { estimateCost } from "../types";
 import type { GenerationInput, GenerationJob, ProviderModel } from "../types";
 import type { GenerationProvider, PollOutcome, SubmitOutcome } from "./provider";
@@ -129,13 +129,18 @@ export class FalVideoProvider implements GenerationProvider {
     const remoteUrl = findVideoUrl(resultBody);
     if (!remoteUrl) return { kind: "failed", error: "Fal completed but returned no video asset." };
 
-    // Fal's CDN URLs expire. The local copy is the artifact.
-    const download = await fetch(remoteUrl);
-    if (!download.ok) {
-      return { kind: "failed", error: `Could not download the finished video (${download.status}).` };
+    // Fal's CDN URLs expire, so the local copy is the real artifact. Where there
+    // is no writable disk, keeping fal's URL is better than failing a generation
+    // that already cost money — it works now and expires later.
+    let assetUrl = remoteUrl;
+    if (await canPersist()) {
+      const download = await fetch(remoteUrl);
+      if (!download.ok) {
+        return { kind: "failed", error: `Could not download the finished video (${download.status}).` };
+      }
+      const bytes = Buffer.from(await download.arrayBuffer());
+      assetUrl = await saveGeneratedAsset(crypto.randomUUID(), "mp4", bytes);
     }
-    const bytes = Buffer.from(await download.arrayBuffer());
-    const assetUrl = await saveGeneratedAsset(crypto.randomUUID(), "mp4", bytes);
 
     return {
       kind: "complete",

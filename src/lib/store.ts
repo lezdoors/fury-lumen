@@ -1,5 +1,6 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import * as path from "node:path";
+import { dbCreateJob, dbGetJob, dbListJobs, dbUpdateJob, hasDatabase } from "./db";
 import type { GenerationJob, ReviewStatus } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -46,15 +47,24 @@ async function writeJobs(jobs: GenerationJob[]) {
   }
 }
 
+/**
+ * Postgres when DATABASE_URL is present, otherwise the local file. The database
+ * is what makes the queue work at all once deployed — two serverless instances
+ * share no memory, so without it the instance that polls has never heard of the
+ * job the other one submitted.
+ */
 export async function listJobs() {
+  if (hasDatabase()) return dbListJobs();
   return (await readJobs()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function getJob(id: string) {
+  if (hasDatabase()) return dbGetJob(id);
   return (await readJobs()).find((job) => job.id === id);
 }
 
 export async function createJob(job: GenerationJob) {
+  if (hasDatabase()) return dbCreateJob(job);
   writeChain = writeChain.then(async () => {
     const jobs = await readJobs();
     jobs.push(job);
@@ -65,6 +75,7 @@ export async function createJob(job: GenerationJob) {
 }
 
 export async function updateJob(id: string, updates: Partial<GenerationJob>) {
+  if (hasDatabase()) return dbUpdateJob(id, updates);
   let updated: GenerationJob | undefined;
   writeChain = writeChain.then(async () => {
     const jobs = await readJobs();
