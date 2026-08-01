@@ -83,6 +83,21 @@ function writeLocale(next: Locale) {
   window.dispatchEvent(new Event(LOCALE_EVENT));
 }
 
+/** Day and time an entry was made — an archive without dates is a pile. */
+function stamp(iso: string, locale: Locale) {
+  try {
+    return new Intl.DateTimeFormat(locale === "ar" ? "ar-MA" : locale, {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      numberingSystem: "latn",
+    }).format(new Date(iso));
+  } catch {
+    return iso.slice(0, 10);
+  }
+}
+
 function clock(seconds: number) {
   const whole = Math.max(0, Math.floor(seconds));
   return `${String(Math.floor(whole / 60)).padStart(2, "0")}:${String(whole % 60).padStart(2, "0")}`;
@@ -1062,8 +1077,11 @@ export function Console({
                       {money(job.actualCostUsd ?? job.estimatedCostUsd)}
                     </span>
                     <span className="tile__meta">
-                      {shortModelId(job.modelId)}
-                      {job.durationSeconds ? ` · ${job.durationSeconds}s` : ""} · {job.aspectRatio}
+                      <span>
+                        {shortModelId(job.modelId)}
+                        {job.durationSeconds ? ` · ${job.durationSeconds}s` : ""} · {job.aspectRatio}
+                      </span>
+                      <time dateTime={job.createdAt}>{stamp(job.createdAt, locale)}</time>
                     </span>
                     <p className="tile__prompt">{job.prompt}</p>
                   </div>

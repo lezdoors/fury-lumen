@@ -451,10 +451,16 @@ button { white-space: nowrap; }
 .ledger {
   position: relative;
   background: var(--void);
-  padding: var(--space-2xl) clamp(var(--space-md), 2.5vw, var(--space-xl)) var(--space-3xl);
+  padding: var(--space-lg) clamp(var(--space-md), 2.5vw, var(--space-xl)) var(--space-3xl);
   border-block-start: var(--hair) solid oklch(100% 0 0 / 0.08);
 }
-.ledger__head { display: grid; gap: var(--space-md); margin-block-end: var(--space-xl); }
+.ledger__head {
+  position: sticky; inset-block-start: 0; z-index: var(--z-sticky);
+  display: grid; gap: var(--space-md);
+  margin-block-end: var(--space-xl);
+  padding-block: var(--space-md);
+  background: linear-gradient(to bottom, var(--void) 72%, transparent 100%);
+}
 .ledger__title { display: flex; align-items: baseline; gap: var(--space-md); flex-wrap: wrap; }
 .ledger__title h2 {
   margin: 0; font-family: var(--type-display); font-weight: 400;
@@ -475,11 +481,18 @@ button { white-space: nowrap; }
 .find::placeholder { color: var(--ink-4); }
 .empty { max-inline-size: 46ch; color: var(--ink-3); font-size: var(--text-sm); line-height: 1.6; text-align: start; }
 
-/* A scatter, not a contact sheet: every third tile takes two columns, so the
-   grid reads as an archive rather than a spreadsheet of thumbnails. */
-.sheet { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(var(--space-md), 2vw, var(--space-xl)); }
+/* Tiles size themselves from the shape they were generated at, so a row holds
+   a 16:9 beside a 9:16. `align-items: start` is what keeps each caption tight
+   under its own image — stretched to the tallest cell in the row instead, a
+   short tile's caption floats a couple of hundred pixels below its picture and
+   the grid stops reading as rows at all. */
+.sheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr));
+  align-items: start;
+  gap: clamp(var(--space-lg), 2.4vw, var(--space-2xl)) clamp(var(--space-md), 1.6vw, var(--space-lg));
+}
 .tile { display: grid; gap: var(--space-sm); min-width: 0; }
-.tile:nth-child(6n + 1) { grid-column: span 2; }
 
 /* The frame owns the clip; the stage button and the action row are siblings
    inside it, because a button cannot legally contain buttons. */
@@ -523,14 +536,27 @@ button { white-space: nowrap; }
   transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 
-.tile__caption { display: grid; gap: var(--space-3xs); min-width: 0; }
+/* This is a ledger, so the entry is ruled and the money is right-aligned to a
+   single axis the way an entry in one would be. */
+.tile__caption {
+  display: grid; gap: var(--space-2xs); min-width: 0;
+  padding-block-start: var(--space-xs);
+  border-block-start: var(--hair) solid oklch(100% 0 0 / 0.12);
+}
 .tile__line {
-  display: flex; justify-content: space-between; gap: var(--space-xs);
+  display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-xs);
   font-family: var(--type-figure); font-size: var(--text-2xs); font-weight: 500;
   color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
   direction: ltr; unicode-bidi: isolate;
 }
-.tile__meta { font-family: var(--type-figure); font-size: 0.5625rem; color: var(--ink-4); letter-spacing: 0.06em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; unicode-bidi: isolate; }
+.tile__meta {
+  display: flex; justify-content: space-between; gap: var(--space-sm);
+  font-family: var(--type-figure); font-size: 0.5625rem; color: var(--ink-4);
+  letter-spacing: 0.06em; min-width: 0;
+  direction: ltr; unicode-bidi: isolate;
+}
+.tile__meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tile__meta time { flex: none; }
 .tile__prompt { margin: 0; font-size: var(--text-xs); color: var(--ink-3); text-align: start; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; unicode-bidi: plaintext; }
 
 /* One orchestrated entrance as a tile arrives, then it is simply there.
@@ -616,8 +642,6 @@ button { white-space: nowrap; }
      card follows. Reversed, the rates push the only action off a phone. */
   .plate { grid-column: 1; grid-row: 2; }
   .rail  { grid-column: 1; grid-row: 3; }
-  .sheet { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .tile:nth-child(6n + 1) { grid-column: span 2; }
 }
 
 @media (max-width: 40rem) {
@@ -629,8 +653,6 @@ button { white-space: nowrap; }
   .runkey { flex: 1 1 auto; justify-content: center; }
   .composer__right { flex: 1 1 11rem; }
   .recipe { order: 3; flex-basis: 100%; text-align: start; }
-  .sheet { grid-template-columns: minmax(0, 1fr); }
-  .tile:nth-child(6n + 1) { grid-column: span 1; }
 }
 
 /* -------------------------------------------------------------------- rtl -- */
