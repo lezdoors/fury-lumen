@@ -261,7 +261,63 @@ button { white-space: nowrap; }
   font-family: var(--type-figure); font-size: var(--text-2xs); color: var(--ink-4);
   letter-spacing: 0.04em; text-transform: uppercase; direction: ltr; unicode-bidi: isolate;
 }
-.rates__list { display: grid; gap: 2px; }
+/* Twenty-one models is taller than the rail, and the rail is anchored to the
+   bottom edge — so an unbounded list grows upward straight through the mast and
+   sits on top of the wordmark. It scrolls inside itself instead, with the top
+   edge faded so a cut-off row reads as "more above" rather than as a bug. */
+.rates__list {
+  display: grid; gap: 2px;
+  max-block-size: min(46vh, 26rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: oklch(100% 0 0 / 0.18) transparent;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 1.5rem, #000 calc(100% - 1.5rem), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 1.5rem, #000 calc(100% - 1.5rem), transparent 100%);
+}
+
+.rates__kinds { display: flex; gap: 2px; padding-inline: var(--space-2xs); }
+.ratekind {
+  flex: 1;
+  padding: 0.3rem 0.4rem;
+  border: var(--hair) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-4);
+  font: inherit; font-size: var(--text-2xs);
+  letter-spacing: var(--track-label); text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out);
+}
+.ratekind:hover { color: var(--ink-2); background: var(--glass-fill); }
+.ratekind.is-active {
+  color: var(--ember-ink);
+  border-color: oklch(64% 0.215 42 / 0.45);
+  background: oklch(64% 0.215 42 / 0.14);
+}
+
+/* One line per distinct blocker, not one per row. */
+.rates__blocked {
+  margin: var(--space-2xs) 0 0;
+  padding-inline-start: var(--space-md);
+  display: grid; gap: var(--space-3xs);
+  font-size: var(--text-2xs);
+  color: var(--ink-4);
+}
+.rates__blocked li::marker { color: var(--ember-deep); }
+
+/* A download is a link, not a button, so the anchor has to be dressed as one. */
+a.act { text-decoration: none; display: inline-flex; align-items: center; }
+.act--wide { padding-inline: var(--space-sm); white-space: nowrap; }
+
+/* The batch count, between the verb and the money. */
+.runkey__count {
+  margin-inline: var(--space-2xs);
+  padding-inline: var(--space-2xs);
+  font-family: var(--type-figure);
+  font-size: var(--text-2xs);
+  color: var(--ember-hot);
+}
 
 .rate {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto;

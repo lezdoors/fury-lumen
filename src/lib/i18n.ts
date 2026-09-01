@@ -87,6 +87,9 @@ export interface Dictionary {
   rateCard: string;
   rateUnit: string;
   needsKey: string;
+  kindAll: string;
+  kindVideo: string;
+  kindStills: string;
   takesReference: string;
 
   format: string;
@@ -160,6 +163,9 @@ const en: Dictionary = {
   rateCard: "Rate card",
   rateUnit: "USD / sec",
   needsKey: "Needs a provider key",
+  kindAll: "All",
+  kindVideo: "Video",
+  kindStills: "Stills",
   takesReference: "REF",
 
   format: "Format",
@@ -234,6 +240,9 @@ const fr: Dictionary = {
   rateCard: "Tarifs",
   rateUnit: "USD / sec",
   needsKey: "Clé fournisseur requise",
+  kindAll: "Tout",
+  kindVideo: "Vidéo",
+  kindStills: "Images",
   takesReference: "RÉF",
 
   format: "Format",
@@ -308,6 +317,9 @@ const es: Dictionary = {
   rateCard: "Tarifas",
   rateUnit: "USD / seg",
   needsKey: "Falta la clave del proveedor",
+  kindAll: "Todo",
+  kindVideo: "Vídeo",
+  kindStills: "Imágenes",
   takesReference: "REF",
 
   format: "Formato",
@@ -382,6 +394,9 @@ const ar: Dictionary = {
   rateCard: "قائمة الأسعار",
   rateUnit: "دولار / ثانية",
   needsKey: "يلزم مفتاح المزوّد",
+  kindAll: "الكل",
+  kindVideo: "فيديو",
+  kindStills: "صور",
   takesReference: "مرجع",
 
   format: "الصيغة",

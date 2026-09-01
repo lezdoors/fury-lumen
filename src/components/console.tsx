@@ -107,6 +107,17 @@ function isVideo(job: GenerationJob) {
   return job.mediaKind === "video" || Boolean(job.mimeType?.startsWith("video/"));
 }
 
+/**
+ * A downloaded file has to land with an extension the operating system
+ * recognises, and the asset URL is not always one — a fal CDN link carries a
+ * query string, and a data URI carries nothing at all.
+ */
+function extensionOf(job: GenerationJob) {
+  const fromUrl = /\.(mp4|webm|mov|png|jpe?g|webp)(\?|$)/i.exec(job.assetUrl ?? "");
+  if (fromUrl) return fromUrl[1].toLowerCase();
+  return isVideo(job) ? "mp4" : "png";
+}
+
 function modelKeyOf(model: Pick<ProviderModel, "providerId" | "id">) {
   return `${model.providerId}:${model.id}`;
 }
@@ -189,7 +200,18 @@ export function Console({
     allowedDurations?.length && !allowedDurations.includes(duration)
       ? allowedDurations[0]
       : duration;
-  const cost = selectedModel ? estimateCost(selectedModel, effectiveDuration) : 0;
+  /**
+   * One prompt per line. A channel episode is a shot list, not a single clip,
+   * and typing twelve prompts into the same box twelve times is the job this
+   * tool exists to remove. A single-line prompt is just a batch of one, so
+   * nothing about the ordinary path changes.
+   */
+  const shots = useMemo(
+    () => prompt.split("\n").map((line) => line.trim()).filter(Boolean),
+    [prompt],
+  );
+  const unitCost = selectedModel ? estimateCost(selectedModel, effectiveDuration) : 0;
+  const cost = unitCost * Math.max(shots.length, 1);
   const needsConfirm = cost > CONFIRM_ABOVE_USD;
   const armSignature = `${modelKey}|${effectiveDuration}|${ratio}|${prompt.trim()}`;
   const armed = armedFor === armSignature;
@@ -198,11 +220,30 @@ export function Console({
     [armSignature],
   );
 
-  /** Sorted cheapest first — the rate card is a price list, so it reads as one. */
+  /**
+   * Sorted cheapest first — the rate card is a price list, so it reads as one.
+   * Twenty-one rows is past the point where one undifferentiated column is
+   * navigable, so the card filters by what the model makes.
+   */
+  const [rateKind, setRateKind] = useState<"all" | "video" | "image">("all");
   const rateCard = useMemo(
-    () => [...models].sort((a, b) => rateOf(a) - rateOf(b)),
-    [models],
+    () =>
+      [...models]
+        .filter((model) => rateKind === "all" || model.mediaKind === rateKind)
+        .sort((a, b) => rateOf(a) - rateOf(b)),
+    [models, rateKind],
   );
+  /**
+   * Every unconfigured model carries the same sentence about the same missing
+   * key. Printed once per row that is twenty-one identical lines of chrome; the
+   * card states each distinct blocker once, underneath.
+   */
+  const blockers = useMemo(() => {
+    const reasons = models
+      .filter((model) => !model.available && model.availabilityReason)
+      .map((model) => model.availabilityReason as string);
+    return Array.from(new Set(reasons));
+  }, [models]);
   const topRate = useMemo(
     () => Math.max(...models.map(rateOf), 0.0001),
     [models],
@@ -555,17 +596,31 @@ export function Console({
       return;
     }
     setArmed(false);
-    const sent = await submit({
-      prompt: prompt.trim(),
-      aspectRatio: ratio,
-      model: selectedModel,
-      durationSeconds: effectiveDuration,
-      referenceUrls: references.map((reference) => reference.url),
-    });
-    if (sent) {
+    // Sequential, not parallel: serials are assigned in creation order, and a
+    // shot list that lands out of order is a shot list you have to re-sort by
+    // hand afterwards.
+    const failed: string[] = [];
+    for (const shot of shots) {
+      const sent = await submit({
+        prompt: shot,
+        aspectRatio: ratio,
+        model: selectedModel,
+        durationSeconds: effectiveDuration,
+        referenceUrls: references.map((reference) => reference.url),
+      });
+      if (!sent) {
+        failed.push(shot);
+        break;
+      }
+    }
+    if (failed.length === 0) {
       setPrompt("");
       setReferences([]);
       setNotice("");
+    } else {
+      // Leave the unsent remainder in the box so nothing is silently dropped.
+      const sentCount = shots.length - failed.length;
+      setPrompt(shots.slice(sentCount).join("\n"));
     }
   }
 
@@ -813,6 +868,7 @@ export function Console({
                     {selectedModel?.mediaKind === "video" ? ` · ${effectiveDuration}s` : ""} ·{" "}
                     {ratio}
                     {references.length > 0 ? ` · ${t.takesReference}` : ""}
+                    {shots.length > 1 ? ` · ${shots.length} shots · ${money(unitCost)} each` : ""}
                   </p>
                   <div className="composer__right">
                     <button
@@ -821,7 +877,9 @@ export function Console({
                       disabled={!canRun}
                       aria-label={t.runAria(money(cost))}
                     >
-                      {runLabel} <b>{isSubmitting ? t.sending : money(cost)}</b>
+                      {runLabel}
+                      {shots.length > 1 && <span className="runkey__count">×{shots.length}</span>}
+                      <b>{isSubmitting ? t.sending : money(cost)}</b>
                     </button>
                   </div>
                 </div>
@@ -861,6 +919,19 @@ export function Console({
               <span className="silk" id="rates-label">{t.rateCard}</span>
               <span className="rates__unit">{t.rateUnit}</span>
             </div>
+            <div className="rates__kinds" role="group" aria-label={t.rateCard}>
+              {(["all", "video", "image"] as const).map((kind) => (
+                <button
+                  key={kind}
+                  type="button"
+                  className={`ratekind ${rateKind === kind ? "is-active" : ""}`}
+                  aria-pressed={rateKind === kind}
+                  onClick={() => setRateKind(kind)}
+                >
+                  {kind === "all" ? t.kindAll : kind === "video" ? t.kindVideo : t.kindStills}
+                </button>
+              ))}
+            </div>
             <div className="rates__list">
               {rateCard.map((model) => {
                 const perSecond = model.costPerSecondUsd;
@@ -892,13 +963,20 @@ export function Console({
                     <span className="rate__bar" aria-hidden="true">
                       <i style={{ ["--w" as string]: `${width}%` }} />
                     </span>
-                    {model.availabilityReason && (
+                    {model.available && model.availabilityReason && (
                       <span className="rate__why">{model.availabilityReason}</span>
                     )}
                   </button>
                 );
               })}
             </div>
+            {blockers.length > 0 && (
+              <ul className="rates__blocked">
+                {blockers.map((reason) => (
+                  <li key={reason}>{reason}</li>
+                ))}
+              </ul>
+            )}
           </section>
 
           <section className="controls glass" aria-labelledby="format-label">
@@ -956,6 +1034,31 @@ export function Console({
             <span className="ledger__count">{t.ledgerCount(jobs.length, money(spend))}</span>
           </div>
           <div className="ledger__tools">
+            {/* An episode is a folder of clips, not one clip. Saving them one at
+                a time through the viewer is the slowest part of using this for
+                real work, so the whole visible set comes down in one gesture.
+                Sequential with a gap: a browser silently drops a burst of
+                simultaneous downloads from the same origin. */}
+            {viewable.length > 0 && (
+              <button
+                type="button"
+                className="act act--wide"
+                onClick={async () => {
+                  for (const job of viewable) {
+                    if (!job.assetUrl) continue;
+                    const anchor = document.createElement("a");
+                    anchor.href = job.assetUrl;
+                    anchor.download = `${serials.get(job.id) ?? job.id}.${extensionOf(job)}`;
+                    document.body.appendChild(anchor);
+                    anchor.click();
+                    anchor.remove();
+                    await new Promise((resolve) => setTimeout(resolve, 350));
+                  }
+                }}
+              >
+                {t.download} · {viewable.length}
+              </button>
+            )}
             <label className="sr-only" htmlFor="find">{t.find}</label>
             <input
               id="find"
@@ -1068,6 +1171,15 @@ export function Console({
                       >
                         {job.reviewStatus === "approved" ? t.kept : t.keep}
                       </button>
+                      {job.assetUrl && (
+                        <a
+                          className="act"
+                          href={job.assetUrl}
+                          download={`${serials.get(job.id) ?? job.id}.${extensionOf(job)}`}
+                        >
+                          {t.download}
+                        </a>
+                      )}
                     </div>
                   </div>
 

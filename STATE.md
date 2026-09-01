@@ -169,3 +169,46 @@ under the wall. Each tile is credited to the model that actually made it.
 - Not deployed. Push to `main` is what deploys, so this landed on a branch.
 - The console's rate card was laid out for nine models and now carries 21; the
   rail scrolls, but it wants a second look.
+
+## Studio, 2026-09-01 — made usable at 21 models (Fury)
+
+Three things were wrong the moment the catalogue went from nine models to
+twenty-one, and all three only show up at that size:
+
+- **The rail grew through the mast.** `.rail` is anchored to the bottom edge, so
+  an unbounded rate list grows *upward* and sits on top of the wordmark. The
+  list now scrolls inside itself, capped at `min(46vh, 26rem)`, with the top and
+  bottom edges masked so a cut-off row reads as "more above" and not as a bug.
+- **One filter, because twenty-one rows is past scanning.** All / Video / Stills,
+  in all four languages.
+- **The same sentence, twenty-one times.** Every unconfigured model repeated
+  "Add FAL_KEY to .env.local". Per-row reasons are now shown only for models
+  that actually work — a note about audio pricing is worth a line — and each
+  distinct blocker is stated once, under the card.
+
+### Shot lists
+
+The composer takes one prompt per line and fires one job per line, sequentially.
+An episode is a shot list, not a clip, and typing twelve prompts into the same
+box twelve times was the job this tool exists to remove. Sequential rather than
+parallel because serials are assigned in creation order, and a shot list that
+lands out of order is one you re-sort by hand. The button carries the count and
+the total (`Run ×3 $0.36`); a single-line prompt is a batch of one, so the
+ordinary path is unchanged. If a job in the middle fails, the unsent remainder
+stays in the box rather than being silently dropped.
+
+Verified end to end through CDP against proof mode: three lines in, three jobs
+out, serials LMN-0004 to LMN-0006, no faults.
+
+### Downloads
+
+Per tile, and one control for the whole filtered set. Sequential with a 350ms
+gap — a browser silently drops a burst of simultaneous same-origin downloads.
+Filenames are the serial, so LMN-0006.mp4 lands on the disk already named.
+
+### The blocker
+
+**There is still no `FAL_KEY`.** Not in `.env.local` here, and the Vercel project
+carries only `DATABASE_URL`. Every fal model is therefore listed and priced but
+not runnable, in production and locally. Proof mode is the only path that
+executes.
