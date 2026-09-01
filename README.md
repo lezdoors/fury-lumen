@@ -4,6 +4,8 @@ A pay-per-generation interface for AI image and video. One box: describe it,
 pick a model, generate. Results land in a grid. The price of a click is on the
 button before you click it.
 
+`/` is the landing page. `/studio` is the console.
+
 Built to replace a flat monthly aggregator subscription with per-generation
 billing, and to be usable by someone who does not want to learn what a model is.
 
@@ -64,5 +66,9 @@ pnpm build      # production build
 ## Status
 
 See `STATE.md` for what is verified, what is assumed, and what has never run.
-Model ids and prices in `src/lib/catalog.ts` are **unverified** — check them
-against the provider before trusting a number the interface shows.
+
+Model ids, prices and accepted durations in `src/lib/catalog.ts` were read off
+fal's own APIs on **2026-09-01** — prices from `https://fal.ai/api/models`
+(`pricingInfoOverride`), durations from each endpoint's OpenAPI `duration` enum.
+The landing page prints those figures verbatim, so re-read them before changing
+anything there: a guess in that file becomes a false claim on a public site.

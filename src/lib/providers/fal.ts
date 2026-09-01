@@ -44,39 +44,75 @@ function describeFailure(status: number, body: unknown) {
   return [hints[status] ?? `Fal returned ${status}.`, text].filter(Boolean).join(" ");
 }
 
-/** Result payloads vary by model (`video.url`, `videos[].url`, ...). */
-function findVideoUrl(node: unknown): string | undefined {
+/** Result payloads vary by model (`video.url`, `images[].url`, ...). */
+const ASSET_PATTERN = /^https?:\/\/.*\.(mp4|webm|mov|png|jpe?g|webp)(\?|$)/i;
+
+function findAssetUrl(node: unknown): string | undefined {
   if (typeof node === "string") {
-    return /^https?:\/\/.*\.(mp4|webm|mov)(\?|$)/i.test(node) ? node : undefined;
+    return ASSET_PATTERN.test(node) ? node : undefined;
   }
   if (Array.isArray(node)) {
     for (const entry of node) {
-      const found = findVideoUrl(entry);
+      const found = findAssetUrl(entry);
       if (found) return found;
     }
     return undefined;
   }
   if (typeof node === "object" && node !== null) {
     for (const value of Object.values(node)) {
-      const found = findVideoUrl(value);
+      const found = findAssetUrl(value);
       if (found) return found;
     }
   }
   return undefined;
 }
 
-export class FalVideoProvider implements GenerationProvider {
+/**
+ * Every still model in the catalogue takes `aspect_ratio` except FLUX.2 Pro,
+ * which sizes by a named preset. Fal rejects an unknown field outright, so the
+ * shape has to be right at submit time rather than corrected after a 422.
+ */
+const FLUX_IMAGE_SIZE: Record<string, string> = {
+  "1:1": "square_hd",
+  "4:5": "portrait_4_3",
+  "3:4": "portrait_4_3",
+  "16:9": "landscape_16_9",
+  "9:16": "portrait_16_9",
+};
+
+function extensionOf(url: string) {
+  const match = /\.(mp4|webm|mov|png|jpe?g|webp)(\?|$)/i.exec(url);
+  return (match?.[1] ?? "mp4").toLowerCase();
+}
+
+const MIME: Record<string, string> = {
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mov: "video/quicktime",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+};
+
+export class FalProvider implements GenerationProvider {
   id = "fal";
 
   async submit(input: GenerationInput, model: ProviderModel): Promise<SubmitOutcome> {
     const key = requireKey();
     const endpoint = model.endpoint ?? model.id;
 
-    const payload: Record<string, unknown> = {
-      prompt: input.prompt,
-      aspect_ratio: input.aspectRatio,
-    };
-    if (input.durationSeconds) payload.duration = String(input.durationSeconds);
+    const payload: Record<string, unknown> = { prompt: input.prompt };
+    if (endpoint.startsWith("fal-ai/flux-2")) {
+      payload.image_size = FLUX_IMAGE_SIZE[input.aspectRatio] ?? "landscape_4_3";
+    } else {
+      payload.aspect_ratio = input.aspectRatio;
+    }
+    // Stills carry no duration, and a model that does not declare one refuses
+    // the field rather than ignoring it.
+    if (model.mediaKind === "video" && input.durationSeconds) {
+      payload.duration = String(input.durationSeconds);
+    }
     // A reference image switches the model into image-to-video. The caller is
     // responsible for choosing an image-to-video endpoint when it passes one.
     //
@@ -132,8 +168,9 @@ export class FalVideoProvider implements GenerationProvider {
       return { kind: "failed", error: describeFailure(resultResponse.status, resultBody) };
     }
 
-    const remoteUrl = findVideoUrl(resultBody);
-    if (!remoteUrl) return { kind: "failed", error: "Fal completed but returned no video asset." };
+    const remoteUrl = findAssetUrl(resultBody);
+    if (!remoteUrl) return { kind: "failed", error: "Fal completed but returned no asset." };
+    const extension = extensionOf(remoteUrl);
 
     // Fal's CDN URLs expire, so the local copy is the real artifact. Where there
     // is no writable disk, keeping fal's URL is better than failing a generation
@@ -142,17 +179,17 @@ export class FalVideoProvider implements GenerationProvider {
     if (await canPersist()) {
       const download = await fetch(remoteUrl);
       if (!download.ok) {
-        return { kind: "failed", error: `Could not download the finished video (${download.status}).` };
+        return { kind: "failed", error: `Could not download the finished asset (${download.status}).` };
       }
       const bytes = Buffer.from(await download.arrayBuffer());
-      assetUrl = await saveGeneratedAsset(crypto.randomUUID(), "mp4", bytes);
+      assetUrl = await saveGeneratedAsset(crypto.randomUUID(), extension, bytes);
     }
 
     return {
       kind: "complete",
       result: {
         assetUrl,
-        mimeType: "video/mp4",
+        mimeType: MIME[extension] ?? "application/octet-stream",
         providerJobId: job.providerJobId,
         actualCostUsd: job.estimatedCostUsd,
       },

@@ -103,3 +103,69 @@ from the server.
 - Provider choice is open. `src/lib/providers/` is a two-method contract
   (`submit`/`poll`), so going direct to a vendor instead of through fal is one
   new file and no changes elsewhere.
+
+---
+
+## Landing page — added 2026-09-01 (Fury)
+
+`/` is now the landing page and the console moved to `/studio`. Nothing in the
+console changed except its route and its model list.
+
+The page is built out of `src/lib/catalog.ts` — every price, every accepted
+duration and the model count are read from it at render time. Nothing is typed
+into markup, because a number typed into markup outlives the repricing that
+makes it wrong. `getPriceList()` exists for exactly this: one row per model with
+the shortest run it will actually accept already worked out, so "from $0.12" can
+point at the row it came from.
+
+Prices and durations were read off fal's own APIs on **2026-09-01**. The date is
+printed on the page.
+
+### Catalogue
+
+21 models: 14 video, 7 stills. Veo 3.1 (three tiers), Kling 3 / 2.5 Turbo,
+Hailuo 02, Wan 3.0, Seedance 2.0 / 2.5, plus Kling Image o3, FLUX.2 Pro, the
+Nano Banana family and two Gemini image models. Cheapest complete run is $0.12
+(Veo 3.1 Lite, 4s at $0.03/sec); dearest listed second is Seedance 2.0 at
+$0.3034. Video prices span 10× as listed, and 16× once Seedance 2.5 runs at
+1080p ($0.473/sec).
+
+`FalVideoProvider` is now `FalProvider` and handles stills as well: no `duration`
+field for an image model, `image_size` instead of `aspect_ratio` for FLUX.2, and
+the result walker accepts image URLs. Fal rejects an unknown field outright, so
+the payload shape has to be right at submit time.
+
+### Two bands
+
+The page runs in two registers, and the seam between them is hard on both
+edges. Media — hero, the box, the wall — stays in the black room, where a
+generated frame is the brightest thing on the screen. The argument — prices,
+arithmetic, steps, questions — sits on warm paper, because twenty-one rows of
+prices is a document and a document on black is a poster nobody reads.
+
+Paper tokens live in `tokens.css` but nothing outside `.paper` uses them; the
+console never enters that band. The one exception inside it is the calculator's
+readout, which keeps the room's darkness so the monthly total reads as lit
+rather than printed.
+
+A graded top edge was tried and reverted: it put the provenance note — the one
+paragraph on the page that has to be read — halfway up a ramp from black to
+paper, legible at neither end.
+
+The dark half was also lifted off pure black (cards to oklch(12%), edges to
+0.2 alpha, the two dimmest inks up two steps), scoped to `.page` so the console
+keeps the register it was tuned in.
+
+### Assets
+
+`public/showcase/` — three 5s clips and six stills, generated on Higgsfield on
+2026-09-01 specifically for this page, because Lumen has no fal key yet and
+`~/brand-assets` does not exist on this machine. The page says so, in the note
+under the wall. Each tile is credited to the model that actually made it.
+
+### Not done
+
+- Nothing has still ever called fal. No key, $0 spent.
+- Not deployed. Push to `main` is what deploys, so this landed on a branch.
+- The console's rate card was laid out for nine models and now carries 21; the
+  rail scrolls, but it wants a second look.

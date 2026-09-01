@@ -32,6 +32,23 @@
   --void-2: oklch(8% 0.004 40);
   --smoke: oklch(13% 0.006 40);
 
+  /* -- paper -------------------------------------------------------------- *
+   * The landing page runs the media sections in the black room and the
+   * argument sections on paper. A price list is a document; a document on
+   * black is a poster, and nobody reads a poster of twenty-one rows.
+   * The console never enters this band and never uses these.
+   */
+  --paper: oklch(96% 0.006 75);
+  --paper-2: oklch(99% 0.004 85);
+  --paper-sunk: oklch(93% 0.008 72);
+  --paper-ink: oklch(20% 0.012 55);
+  --paper-ink-2: oklch(40% 0.010 55);
+  --paper-ink-3: oklch(55% 0.008 55);
+  --paper-rule: oklch(20% 0.012 55 / 0.14);
+  --paper-rule-lit: oklch(20% 0.012 55 / 0.32);
+  /* The ember has to darken to survive on paper — same hue, half the light. */
+  --ember-on-paper: oklch(52% 0.19 40);
+
   /* -- glass -------------------------------------------------------------- */
   --glass-fill: oklch(100% 0 0 / 0.045);
   --glass-fill-lit: oklch(100% 0 0 / 0.085);
@@ -55,11 +72,11 @@
   --dead: oklch(48% 0.020 40);
 
   /* -- type --------------------------------------------------------------- */
-  --type-display: "Instrument Serif", ui-serif, Georgia, serif;
-  --type-ui: "Inter Tight", "SF Arabic", "Geeza Pro", ui-sans-serif, system-ui, sans-serif;
+  --type-display: var(--font-display), "Instrument Serif", ui-serif, Georgia, serif;
+  --type-ui: var(--font-ui), "Inter Tight", "SF Arabic", "Geeza Pro", ui-sans-serif, system-ui, sans-serif;
   /* Every figure in the interface. Tabular, engineered, and the only face that
      ever carries money — a price that reflows as it changes is not a readout. */
-  --type-figure: "Martian Mono", ui-monospace, monospace;
+  --type-figure: var(--font-figure), "Martian Mono", ui-monospace, monospace;
 
   --text-2xs: 0.6875rem;
   --text-xs: 0.75rem;
