@@ -37,12 +37,19 @@ export function Landing({
         cheapestStill={cheapestStill}
       />
       <main>
+        {/* The room: media, on black, where a generated frame is the brightest
+            thing on the screen. */}
         <Box rows={rows} />
         <Wall />
-        <Prices rows={rows} verifiedOn={verifiedOn} />
-        <Arithmetic rows={rows} />
-        <Steps />
-        <Faq />
+
+        {/* The document: prices and arithmetic, on paper. A twenty-one row
+            price list is something you read, not something you look at. */}
+        <div className="paper">
+          <Prices rows={rows} verifiedOn={verifiedOn} />
+          <Arithmetic rows={rows} />
+          <Steps />
+          <Faq />
+        </div>
       </main>
       <Close modelCount={modelCount} verifiedOn={verifiedOn} />
     </div>

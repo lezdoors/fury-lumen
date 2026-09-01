@@ -15,6 +15,18 @@
  * ------------------------------------------------------------------------- */
 
 .page {
+  /* The dark half, lifted off pure black. Cards get a warm charcoal, edges get
+     enough alpha to read as edges, and the two dimmest inks come up two steps —
+     40% grey on 5% black is a decoration, not text. Scoped to .page so the
+     console keeps the register it was tuned in. */
+  --void-2: oklch(12% 0.006 45);
+  --smoke: oklch(17% 0.007 45);
+  --glass-fill: oklch(100% 0 0 / 0.06);
+  --glass-fill-lit: oklch(100% 0 0 / 0.11);
+  --glass-edge: oklch(100% 0 0 / 0.2);
+  --ink-3: oklch(66% 0.006 60);
+  --ink-4: oklch(52% 0.006 60);
+
   background: var(--void);
   color: var(--ink);
   font-family: var(--type-ui);
@@ -807,7 +819,7 @@
 }
 
 .wall__provenance {
-  margin: var(--space-xl) 0 0;
+  margin: var(--space-xl) 0 var(--space-2xl);
   max-inline-size: 72ch;
   font-size: var(--text-xs);
   color: var(--ink-3);
@@ -1153,6 +1165,221 @@
   letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--ink-2);
+}
+
+
+/* --------------------------------------------------------------------------
+ * THE PAPER BAND
+ *
+ * Media lives in the black room, where a generated frame is the brightest
+ * thing on the screen. The argument lives on paper, because twenty-one rows of
+ * prices is a document and a document on black is a poster.
+ *
+ * Both edges are hard. A gradient was tried at the top and it put the last
+ * paragraph of the wall — the provenance note, the one paragraph on the page
+ * that has to be read — halfway up a ramp from black to paper, legible at
+ * neither end. The room ends and the document starts.
+ * ------------------------------------------------------------------------- */
+
+.paper {
+  position: relative;
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+
+.paper .kicker {
+  color: var(--paper-ink-3);
+}
+
+.paper .display {
+  color: var(--paper-ink);
+}
+
+.paper .display__accent {
+  color: var(--ember-on-paper);
+}
+
+.paper .lede {
+  color: var(--paper-ink-2);
+}
+
+.paper .pill {
+  border-color: var(--paper-rule);
+  color: var(--paper-ink-3);
+}
+
+.paper .pill:hover {
+  color: var(--paper-ink);
+  border-color: var(--paper-rule-lit);
+}
+
+.paper .pill--on {
+  color: var(--ember-on-paper);
+  border-color: oklch(52% 0.19 40 / 0.55);
+  background: oklch(52% 0.19 40 / 0.09);
+}
+
+.paper .duration {
+  border-color: var(--paper-rule);
+  color: var(--paper-ink-2);
+}
+
+.paper .duration:hover {
+  color: var(--paper-ink);
+  border-color: var(--paper-rule-lit);
+}
+
+.paper .duration--on {
+  color: var(--ember-on-paper);
+  border-color: oklch(52% 0.19 40 / 0.55);
+  background: oklch(52% 0.19 40 / 0.1);
+}
+
+/* -- ledger on paper ------------------------------------------------------ */
+
+.paper .ledger,
+.paper .ledger__head,
+.paper .ledger__row {
+  border-color: var(--paper-rule);
+}
+
+.paper .ledger__head {
+  color: var(--paper-ink-3);
+}
+
+.paper .ledger__row:hover {
+  background: var(--paper-sunk);
+}
+
+.paper .ledger__model {
+  color: var(--paper-ink);
+}
+
+.paper .ledger__endpoint,
+.paper .ledger__note,
+.paper .ledger__per {
+  color: var(--paper-ink-3);
+}
+
+.paper .ledger__basis {
+  color: var(--paper-ink-2);
+}
+
+.paper .ledger__run {
+  color: var(--ember-on-paper);
+}
+
+.paper .honest {
+  border-color: var(--paper-rule);
+  background: var(--paper-2);
+}
+
+.paper .honest h3 {
+  color: var(--paper-ink);
+}
+
+.paper .honest ul {
+  color: var(--paper-ink-2);
+}
+
+.paper .honest li::marker {
+  color: var(--ember-on-paper);
+}
+
+/* -- calculator on paper --------------------------------------------------- */
+
+.paper .calc {
+  border-color: var(--paper-rule);
+  background: var(--paper-2);
+  backdrop-filter: none;
+}
+
+.paper .field__label {
+  color: var(--paper-ink-2);
+}
+
+.paper .field__label b {
+  color: var(--ember-on-paper);
+}
+
+.paper .field select,
+.paper .field input[type="number"] {
+  border-color: var(--paper-rule);
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+
+.paper .field input[type="range"] {
+  accent-color: var(--ember-on-paper);
+}
+
+/* The readout keeps the room's darkness — the total is the one figure on this
+   band that should read as lit rather than printed. */
+.paper .calc__readout {
+  border-color: transparent;
+  background:
+    radial-gradient(120% 100% at 50% 0%, oklch(64% 0.215 42 / 0.16), transparent 62%),
+    var(--void);
+  color: var(--ink);
+}
+
+.paper .calc__label {
+  color: var(--ink-4);
+}
+
+.paper .calc__clip {
+  color: var(--ink-2);
+}
+
+.paper .calc__total {
+  color: var(--ink);
+}
+
+.paper .calc__delta {
+  color: var(--ink-3);
+}
+
+.paper .calc__good {
+  color: var(--ember-hot);
+}
+
+/* -- steps and questions on paper ------------------------------------------ */
+
+.paper .step {
+  border-block-start-color: var(--paper-rule);
+}
+
+.paper .step__n {
+  color: var(--ember-on-paper);
+}
+
+.paper .step h3 {
+  color: var(--paper-ink);
+}
+
+.paper .step p {
+  color: var(--paper-ink-2);
+}
+
+.paper .faq__list,
+.paper .faq__item {
+  border-color: var(--paper-rule);
+}
+
+.paper .faq__item button {
+  color: var(--paper-ink);
+}
+
+.paper .faq__item button:hover {
+  color: var(--ember-on-paper);
+}
+
+.paper .faq__sign {
+  color: var(--paper-ink-3);
+}
+
+.paper .faq__body p {
+  color: var(--paper-ink-2);
 }
 
 /* -- narrow --------------------------------------------------------------- */
