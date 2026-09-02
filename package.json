@@ -11,7 +11,10 @@
     "check": "pnpm lint && pnpm typecheck && pnpm build"
   },
   "dependencies": {
+    "@ai-sdk/gateway": "^4.0.73",
     "@neondatabase/serverless": "^1.1.0",
+    "@vercel/blob": "^2.8.0",
+    "ai": "^7.0.91",
     "framer-motion": "^13.1.1",
     "next": "16.2.12",
     "react": "19.2.4",

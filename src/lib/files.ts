@@ -2,8 +2,29 @@ import { execFile } from "node:child_process";
 import { mkdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 import { promisify } from "node:util";
+import { put } from "@vercel/blob";
 
 const GENERATED_DIR = path.join(process.cwd(), "data", "assets");
+
+const CONTENT_TYPES: Record<string, string> = {
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mov: "video/quicktime",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+};
+
+/**
+ * Blob is the only durable store once this is deployed. Provider CDN links
+ * expire within days, so a generation that keeps its fal or OpenAI URL is a
+ * clip you paid for and will lose — which for a channel archive is the whole
+ * point of the library.
+ */
+export function hasBlobStore() {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+}
 
 /**
  * Serverless hosts ship a read-only bundle. Probing once tells the rest of the
@@ -13,6 +34,7 @@ const GENERATED_DIR = path.join(process.cwd(), "data", "assets");
  */
 let writable: Promise<boolean> | undefined;
 export function canPersist() {
+  if (hasBlobStore()) return Promise.resolve(true);
   writable ??= (async () => {
     try {
       await mkdir(GENERATED_DIR, { recursive: true });
@@ -34,6 +56,18 @@ export async function saveGeneratedAsset(
 ): Promise<string> {
   const safeExtension = extension.replace(/[^a-z0-9]/gi, "").toLowerCase() || "bin";
   const filename = `${id}.${safeExtension}`;
+
+  // Blob returns an absolute URL, so the library, the download links and any
+  // image-to-video reference all point at the same durable copy.
+  if (hasBlobStore()) {
+    const blob = await put(`generated/${filename}`, contents, {
+      access: "public",
+      contentType: CONTENT_TYPES[safeExtension] ?? "application/octet-stream",
+      addRandomSuffix: false,
+    });
+    return blob.url;
+  }
+
   await mkdir(GENERATED_DIR, { recursive: true });
   await writeFile(path.join(GENERATED_DIR, filename), contents);
   return `/api/assets/${filename}`;

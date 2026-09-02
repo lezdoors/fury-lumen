@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Inter_Tight, Martian_Mono } from "next/font/google";
 import "./globals.css";
+import { CATALOG_SIZE } from "@/lib/catalog";
 
 /* The three faces tokens.css asks for. Loaded here rather than linked, so the
    display serif is not swapped in halfway through the hero's entrance. */
@@ -25,14 +26,14 @@ const figure = Martian_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.lmiere.com"),
+  metadataBase: new URL("https://fury-lumen.vercel.app"),
   title: "Lumen — the price is on the button",
   description:
-    "21 image and video models in one prompt box — Veo 3.1, Seedance, Kling 3, Hailuo, Nano Banana. The exact dollar cost sits on the button before you press it. No credits, no subscription.",
+    `${CATALOG_SIZE} image and video models in one prompt box — Veo 3.1, Seedance, Kling, Wan, Nano Banana, Seedream. The exact dollar cost sits on the button before you press it. No credits, no subscription.`,
   openGraph: {
     title: "Lumen — the price is on the button",
     description:
-      "Pay per generation, in dollars, across 21 image and video models. See the price before you click.",
+      `Pay per generation, in dollars, across ${CATALOG_SIZE} image and video models. See the price before you click.`,
     images: ["/showcase/s1-horizon.webp"],
   },
 };

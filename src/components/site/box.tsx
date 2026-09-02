@@ -107,7 +107,7 @@ export function Box({ rows }: { rows: PriceRow[] }) {
           </div>
 
           <div className="console-mock__rail">
-            <span className="console-mock__label">Model · {models.length} of 21 shown</span>
+            <span className="console-mock__label">Model · {models.length} of {rows.length} shown</span>
             <ul className="rate-list">
               {models.map((row, rowIndex) => (
                 <li key={row.endpoint}>

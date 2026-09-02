@@ -677,6 +677,15 @@ export function Console({
         ? `${job.assetUrl}?poster=1`
         : (job.assetUrl as string);
 
+  /**
+   * Blob-stored assets are absolute URLs, and `?poster=1` means nothing to a
+   * CDN — it would hand an <img> a video body and every tile would collapse to
+   * the same fallback still. Those tiles render the video itself instead; the
+   * `#t=0.1` fragment is what makes Safari paint a frame rather than nothing.
+   */
+  const posterlessVideo = (job: GenerationJob) =>
+    isVideo(job) && /^https?:/i.test(job.assetUrl ?? "");
+
   const runLabel = armed ? t.confirm : t.run;
 
   return (
@@ -1125,7 +1134,14 @@ export function Console({
                       aria-label={job.prompt}
                       onClick={() => job.assetUrl && setOpenId(job.id)}
                     >
-                      {job.assetUrl ? (
+                      {job.assetUrl && posterlessVideo(job) ? (
+                        <video
+                          src={`${job.assetUrl}#t=0.1`}
+                          preload="metadata"
+                          muted
+                          playsInline
+                        />
+                      ) : job.assetUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={posterFor(job)}

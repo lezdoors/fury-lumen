@@ -233,10 +233,313 @@ const FAL_IMAGE: FalImage[] = [
 ];
 
 /** The date every price and duration above was read from fal. */
+
+/**
+ * Vercel's AI Gateway, read live off `https://ai-gateway.vercel.sh/v1/models`
+ * on **2026-09-02**. That endpoint publishes each model's accepted durations
+ * and its cost per second broken out by resolution and audio, so these figures
+ * are the provider's own rather than a transcription of a pricing page.
+ *
+ * Only models whose price is unambiguous at one pinned setting are listed. A
+ * model billed by token (the gpt-image family) or with an empty price block
+ * (FLUX.2) is left out on purpose: Lumen's promise is an exact dollar before
+ * the click, and a token count is not knowable then.
+ *
+ * Every video row is quoted at 720p with audio off, which is exactly what
+ * `GatewayProvider` asks for. Changing that pin without changing these numbers
+ * would make the button lie.
+ */
+interface GatewayVideo {
+  endpoint: string;
+  label: string;
+  family: string;
+  costPerSecondUsd: number;
+  durations: number[];
+  basis: string;
+  note?: string;
+}
+
+interface GatewayImage {
+  endpoint: string;
+  label: string;
+  family: string;
+  costUsd: number;
+  basis: string;
+  note?: string;
+}
+
+/** Video on the gateway, cheapest per second first. */
+const GATEWAY_VIDEO: GatewayVideo[] = [
+  {
+    endpoint: "bytedance/seedance-v1.0-pro-fast",
+    label: "Seedance v1.0 Pro Fast",
+    family: "Seedance",
+    costPerSecondUsd: 0.0206,
+    durations: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    basis: "720p, audio off",
+  },
+  {
+    endpoint: "bytedance/seedance-v1.5-pro",
+    label: "Seedance v1.5 Pro",
+    family: "Seedance",
+    costPerSecondUsd: 0.0259,
+    durations: [4, 5, 6, 7, 8, 9, 10, 11, 12],
+    basis: "720p, audio off",
+    note: "Audio on is $0.0518/sec.",
+  },
+  {
+    endpoint: "google/veo-3.1-lite-generate-001",
+    label: "Veo 3.1 Lite Generate",
+    family: "Veo",
+    costPerSecondUsd: 0.03,
+    durations: [4, 6, 8],
+    basis: "720p, audio off",
+    note: "Audio on is $0.05/sec.",
+  },
+  {
+    endpoint: "bytedance/seedance-v1.0-pro",
+    label: "Seedance v1.0 Pro",
+    family: "Seedance",
+    costPerSecondUsd: 0.0515,
+    durations: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    basis: "720p, audio off",
+  },
+  {
+    endpoint: "spacexai/grok-imagine-video",
+    label: "Grok Imagine",
+    family: "Grok",
+    costPerSecondUsd: 0.07,
+    durations: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    basis: "720p, audio off",
+  },
+  {
+    endpoint: "alibaba/wan-v2.5-t2v-preview",
+    label: "Wan v2.5 Text-to-Video Preview",
+    family: "Wan",
+    costPerSecondUsd: 0.1,
+    durations: [5, 10],
+    basis: "720p, audio off",
+  },
+  {
+    endpoint: "alibaba/wan-v2.6-t2v",
+    label: "Wan v2.6 Text-to-Video",
+    family: "Wan",
+    costPerSecondUsd: 0.1,
+    durations: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    basis: "720p, audio off",
+  },
+  {
+    endpoint: "alibaba/wan-v2.7-t2v",
+    label: "Wan v2.7 Text-to-Video",
+    family: "Wan",
+    costPerSecondUsd: 0.1,
+    durations: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    basis: "720p, audio off",
+  },
+  {
+    endpoint: "alibaba/wan-v3.0-video",
+    label: "Wan v3.0 Video",
+    family: "Wan",
+    costPerSecondUsd: 0.1,
+    durations: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    basis: "720p, audio off",
+  },
+  {
+    endpoint: "google/veo-3.0-fast-generate-001",
+    label: "Veo 3.0 Fast Generate",
+    family: "Veo",
+    costPerSecondUsd: 0.1,
+    durations: [4, 6, 8],
+    basis: "720p, audio off",
+    note: "Audio on is $0.15/sec.",
+  },
+  {
+    endpoint: "google/veo-3.1-fast-generate-001",
+    label: "Veo 3.1 Fast Generate",
+    family: "Veo",
+    costPerSecondUsd: 0.1,
+    durations: [4, 6, 8],
+    basis: "720p, audio off",
+    note: "Audio on is $0.15/sec.",
+  },
+  {
+    endpoint: "alibaba/wan-v3.0-video-prime",
+    label: "Wan v3.0 Video Prime",
+    family: "Wan",
+    costPerSecondUsd: 0.14,
+    durations: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    basis: "720p, audio off",
+  },
+  {
+    endpoint: "spacexai/grok-imagine-video-1.5",
+    label: "Grok Imagine Video 1.5",
+    family: "Grok",
+    costPerSecondUsd: 0.14,
+    durations: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    basis: "720p, audio off",
+  },
+  {
+    endpoint: "google/veo-3.0-generate-001",
+    label: "Veo 3.0",
+    family: "Veo",
+    costPerSecondUsd: 0.2,
+    durations: [4, 6, 8],
+    basis: "720p, audio off",
+    note: "Audio on is $0.4/sec.",
+  },
+  {
+    endpoint: "google/veo-3.1-generate-001",
+    label: "Veo 3.1",
+    family: "Veo",
+    costPerSecondUsd: 0.2,
+    durations: [4, 6, 8],
+    basis: "720p, audio off",
+    note: "Audio on is $0.4/sec.",
+  },
+];
+
+/** Stills on the gateway. Flat per image, so the button is exact. */
+const GATEWAY_IMAGE: GatewayImage[] = [
+  {
+    endpoint: "meta/muse-image-1.0",
+    label: "Muse Image 1.0",
+    family: "Muse",
+    costUsd: 0.01,
+    basis: "per image",
+  },
+  {
+    endpoint: "spacexai/grok-imagine-image",
+    label: "Grok Imagine Image",
+    family: "Grok",
+    costUsd: 0.02,
+    basis: "per image",
+  },
+  {
+    endpoint: "recraft/recraft-v2",
+    label: "Recraft V2",
+    family: "Recraft",
+    costUsd: 0.022,
+    basis: "per image",
+  },
+  {
+    endpoint: "bytedance/seedream-4.0",
+    label: "Seedream 4.0",
+    family: "Seedream",
+    costUsd: 0.03,
+    basis: "per image",
+  },
+  {
+    endpoint: "bytedance/seedream-5.0-lite",
+    label: "Seedream 5.0 Lite",
+    family: "Seedream",
+    costUsd: 0.035,
+    basis: "per image",
+  },
+  {
+    endpoint: "recraft/recraft-v4.1",
+    label: "Recraft V4.1",
+    family: "Recraft",
+    costUsd: 0.035,
+    basis: "per image",
+  },
+  {
+    endpoint: "recraft/recraft-v4.1-utility",
+    label: "Recraft V4.1 Utility",
+    family: "Recraft",
+    costUsd: 0.035,
+    basis: "per image",
+  },
+  {
+    endpoint: "bfl/flux-kontext-pro",
+    label: "FLUX.1 Kontext Pro",
+    family: "FLUX",
+    costUsd: 0.04,
+    basis: "per image",
+  },
+  {
+    endpoint: "bfl/flux-pro-1.1",
+    label: "FLUX1.1 [pro]",
+    family: "FLUX",
+    costUsd: 0.04,
+    basis: "per image",
+  },
+  {
+    endpoint: "bytedance/seedream-4.5",
+    label: "Seedream 4.5",
+    family: "Seedream",
+    costUsd: 0.04,
+    basis: "per image",
+  },
+  {
+    endpoint: "recraft/recraft-v3",
+    label: "Recraft V3",
+    family: "Recraft",
+    costUsd: 0.04,
+    basis: "per image",
+  },
+  {
+    endpoint: "recraft/recraft-v4",
+    label: "Recraft V4",
+    family: "Recraft",
+    costUsd: 0.04,
+    basis: "per image",
+  },
+  {
+    endpoint: "bfl/flux-pro-1.0-fill",
+    label: "FLUX.1 Fill [pro]",
+    family: "FLUX",
+    costUsd: 0.05,
+    basis: "per image",
+  },
+  {
+    endpoint: "bfl/flux-pro-1.1-ultra",
+    label: "FLUX1.1 [pro] Ultra",
+    family: "FLUX",
+    costUsd: 0.06,
+    basis: "per image",
+  },
+  {
+    endpoint: "spacexai/grok-imagine-image-2.0",
+    label: "Grok Imagine Image 2.0",
+    family: "Grok",
+    costUsd: 0.06,
+    basis: "per image",
+  },
+  {
+    endpoint: "bfl/flux-kontext-max",
+    label: "FLUX.1 Kontext Max",
+    family: "FLUX",
+    costUsd: 0.08,
+    basis: "per image",
+  },
+  {
+    endpoint: "recraft/recraft-v4.1-pro",
+    label: "Recraft V4.1 Pro",
+    family: "Recraft",
+    costUsd: 0.21,
+    basis: "per image",
+  },
+  {
+    endpoint: "recraft/recraft-v4.1-utility-pro",
+    label: "Recraft V4.1 Utility Pro",
+    family: "Recraft",
+    costUsd: 0.21,
+    basis: "per image",
+  },
+  {
+    endpoint: "recraft/recraft-v4-pro",
+    label: "Recraft V4 Pro",
+    family: "Recraft",
+    costUsd: 0.25,
+    basis: "per image",
+  },
+];
+
 export const CATALOG_VERIFIED_ON = "2026-09-01";
 
 /** What the landing page counts. Proof mode is not a model and is not counted. */
-export const CATALOG_SIZE = FAL_VIDEO.length + FAL_IMAGE.length;
+export const CATALOG_SIZE =
+  FAL_VIDEO.length + FAL_IMAGE.length + GATEWAY_VIDEO.length + GATEWAY_IMAGE.length;
 
 export interface PriceRow {
   endpoint: string;
@@ -287,7 +590,34 @@ export function getPriceList(): PriceRow[] {
     cheapestRunUsd: model.costUsd,
   }));
 
-  return [...video, ...image];
+  const gatewayVideo: PriceRow[] = GATEWAY_VIDEO.map((model) => {
+    const shortest = Math.min(...model.durations);
+    return {
+      endpoint: model.endpoint,
+      label: model.label,
+      family: model.family,
+      mediaKind: "video" as const,
+      unitCostUsd: model.costPerSecondUsd,
+      basis: model.basis,
+      note: model.note,
+      shortestSeconds: shortest,
+      durations: model.durations,
+      cheapestRunUsd: Number((model.costPerSecondUsd * shortest).toFixed(4)),
+    };
+  });
+
+  const gatewayImage: PriceRow[] = GATEWAY_IMAGE.map((model) => ({
+    endpoint: model.endpoint,
+    label: model.label,
+    family: model.family,
+    mediaKind: "image" as const,
+    unitCostUsd: model.costUsd,
+    basis: model.basis,
+    note: model.note,
+    cheapestRunUsd: model.costUsd,
+  }));
+
+  return [...video, ...image, ...gatewayVideo, ...gatewayImage];
 }
 
 export function getModels(): ProviderModel[] {
@@ -295,6 +625,8 @@ export function getModels(): ProviderModel[] {
   const openAICost = Number(process.env.OPENAI_IMAGE_COST_USD ?? "0");
   const falReady = Boolean(process.env.FAL_KEY);
   const falWhy = falReady ? undefined : "Add FAL_KEY to .env.local";
+  const gatewayReady = Boolean(process.env.AI_GATEWAY_API_KEY);
+  const gatewayWhy = gatewayReady ? undefined : "Add AI_GATEWAY_API_KEY to .env.local";
 
   return [
     {
@@ -331,6 +663,31 @@ export function getModels(): ProviderModel[] {
       costPerSecondUsd: model.costPerSecondUsd,
       durations: model.durations,
       asynchronous: true,
+    })),
+    ...GATEWAY_VIDEO.map((model) => ({
+      id: model.endpoint,
+      endpoint: model.endpoint,
+      providerId: "gateway",
+      providerLabel: "AI Gateway",
+      label: model.label,
+      mediaKind: "video" as const,
+      available: gatewayReady,
+      availabilityReason: gatewayReady ? model.note : gatewayWhy,
+      estimatedCostUsd: 0,
+      costPerSecondUsd: model.costPerSecondUsd,
+      durations: model.durations,
+      asynchronous: true,
+    })),
+    ...GATEWAY_IMAGE.map((model) => ({
+      id: model.endpoint,
+      endpoint: model.endpoint,
+      providerId: "gateway",
+      providerLabel: "AI Gateway",
+      label: model.label,
+      mediaKind: "image" as const,
+      available: gatewayReady,
+      availabilityReason: gatewayReady ? model.note : gatewayWhy,
+      estimatedCostUsd: model.costUsd,
     })),
     ...FAL_IMAGE.map((model) => ({
       id: model.endpoint,
