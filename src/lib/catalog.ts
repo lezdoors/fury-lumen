@@ -623,10 +623,16 @@ export function getPriceList(): PriceRow[] {
 export function getModels(): ProviderModel[] {
   const openAIReady = Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_IMAGE_MODEL);
   const openAICost = Number(process.env.OPENAI_IMAGE_COST_USD ?? "0");
+  /**
+   * Where a missing key has to be added depends on where this is running, and
+   * sending someone to `.env.local` on a deployed copy is a dead end — there is
+   * no file to edit there.
+   */
+  const keyHome = process.env.VERCEL ? "the project's environment variables" : ".env.local";
   const falReady = Boolean(process.env.FAL_KEY);
-  const falWhy = falReady ? undefined : "Add FAL_KEY to .env.local";
+  const falWhy = falReady ? undefined : `Add FAL_KEY to ${keyHome}`;
   const gatewayReady = Boolean(process.env.AI_GATEWAY_API_KEY);
-  const gatewayWhy = gatewayReady ? undefined : "Add AI_GATEWAY_API_KEY to .env.local";
+  const gatewayWhy = gatewayReady ? undefined : `Add AI_GATEWAY_API_KEY to ${keyHome}`;
 
   return [
     {
